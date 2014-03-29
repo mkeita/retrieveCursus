@@ -19,5 +19,9 @@ class ManageDB {
 		return $courseExiste;
 	}
 	
+	public function addCourseBd($idcourse){
+		
+	}
+	
 	
 }

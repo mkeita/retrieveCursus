@@ -15,19 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Links and settings
+ * Plugin version info.
  *
- * Contains settings used by logs report.
- *
- * @package    report_retrievecursus
- * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com)
+ * @package    tool_webcttomoodle
+ * @copyright  2011 Piers Harding
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+defined('MOODLE_INTERNAL') || die();
 
-// just a link to course report
-$ADMIN->add('reports', new admin_externalpage('reportretrievecoursus', get_string('pluginname', 'report_retrievecursus'), "$CFG->wwwroot/report/retrievecursus/index.php?id=".SITEID, 'report/retrievecursus:view'));
-
-// no report settings
-$settings = null;
+$plugin->version   = 2014012300;            // The current plugin version (Date: YYYYMMDDXX).
+$plugin->requires  = 2013110500;            // Requires this Moodle version.
+$plugin->component = 'report_retrievecourse';   // Full name of the plugin (used for diagnostics).

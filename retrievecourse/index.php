@@ -7,8 +7,11 @@ require_once 'classes/controller/ControllerFormTeacher.php';
 
 
 defined('MOODLE_INTERNAL') || die;
-
+session_start();
 $id   = optional_param('id', 0, PARAM_INT);// Course ID
+if($id != NULL){
+	$_SESSION['id'] = $id;	
+}
 headerRetrieveCursus($id);
 
 if(is_siteadmin()){
@@ -25,11 +28,11 @@ die();
 
 function headerRetrieveCursus($id){
 	global $PAGE , $OUTPUT ;
-	require_login(2);
+	require_login($_SESSION['id']);
 	$PAGE->set_pagelayout('standard');
-	$PAGE->set_title("Retrieve Cursus");
-	$PAGE->set_heading("Retrieve Cursus");
-	$PAGE->set_url('/report/retrievecursus/index.php');
+	$PAGE->set_title("Retrieve Course");
+	$PAGE->set_heading("Retrieve Course");
+	$PAGE->set_url('/report/retrievecourse/index.php');
 	echo $OUTPUT->header();
 }
 

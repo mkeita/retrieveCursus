@@ -1,6 +1,6 @@
 <?php
 
-$string['pluginname'] = 'Retrieve Cursus';
+$string['pluginname'] = 'Retrieve Course';
 
 //FormTeacher
 $string['warning'] = 'Attention';

@@ -15,27 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Public API of the log report.
+ * Links and settings
  *
- * Defines the APIs used by log reports
+ * Contains settings used by logs report.
  *
- * @package    report_log
+ * @package    report_retrievecursus
  * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
-/**
- * This function extends the navigation with the report items
- *
- * @param navigation_node $navigation The navigation node to extend
- * @param stdClass $course The course to object for the report
- * @param stdClass $context The context of the course
- */
-function report_retrievecursus_extend_navigation_course($navigation, $course, $context) {
-    if (has_capability('report/retrievecursus:view', $context)) {
-        $url = new moodle_url('/report/retrievecursus/index.php', array('id'=>$course->id));
-        $navigation->add(get_string('pluginname', 'report_retrievecursus'), $url, navigation_node::TYPE_SETTING, null, null, new pix_icon('i/report', ''));
-    }
-}
+// just a link to course report
+#$ADMIN->add('reports', new admin_externalpage('reportretrievecourse', get_string('pluginname', 'report_retrievecourse'), "$CFG->wwwroot/report/retrievecourse/index.php?id=".SITEID, 'report/retrievecourse:view'));
+
+// no report settings
+$settings = null;
