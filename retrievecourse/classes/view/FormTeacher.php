@@ -13,16 +13,16 @@ class FormTeacher extends moodleform {
 		global $CFG;
 	
 		$mform = $this->_form; // Don't forget the underscore!
-		$mform->addElement('header', 'header_', get_string('warning','report_retrievecursus'));
-		$mform->addElement('html', get_string('messageTeacher','report_retrievecursus' ));
+		$mform->addElement('header', 'header_', get_string('warning','report_retrievecourse'));
+		$mform->addElement('html', get_string('messageTeacher','report_retrievecourse' ));
 		$mform->closeHeaderBefore('end');
 		
-		$mform->addElement('header', 'header_', get_string('messageTeacherChoice','report_retrievecursus'));
-// 		$mform->addElement('advcheckbox', 'checkbox_recuperer', get_string('checkbox_recuperer', 'report_retrievecursus'), null, array('group' => 1), array(0, 1));
-// 		$mform->addElement('advcheckbox', 'checkbox_newcourse', get_string('checkbox_newcourse', 'report_retrievecursus'), null, array('group' => 1), array(0, 1));
+		$mform->addElement('header', 'header_', get_string('messageTeacherChoice','report_retrievecourse'));
+// 		$mform->addElement('advcheckbox', 'checkbox_recuperer', get_string('checkbox_recuperer', 'report_retrievecourse'), null, array('group' => 1), array(0, 1));
+// 		$mform->addElement('advcheckbox', 'checkbox_newcourse', get_string('checkbox_newcourse', 'report_retrievecourse'), null, array('group' => 1), array(0, 1));
 		$radioarray=array();
-		$radioarray[] =& $mform->createElement('radio', 'choice_teacher', ' ', get_string('checkbox_recuperer', 'report_retrievecursus'), 0, "retrieve");
-		$radioarray[] =& $mform->createElement('radio', 'choice_teacher', ' ', get_string('checkbox_newcourse', 'report_retrievecursus'), 1, "newcourse");
+		$radioarray[] =& $mform->createElement('radio', 'choice_teacher', ' ', get_string('checkbox_recuperer', 'report_retrievecourse'), 0, "retrieve");
+		$radioarray[] =& $mform->createElement('radio', 'choice_teacher', ' ', get_string('checkbox_newcourse', 'report_retrievecourse'), 1, "newcourse");
 		$mform->addGroup($radioarray, 'radioar', ' ', array(' '), false);
 		$mform->closeHeaderBefore('end');
 		

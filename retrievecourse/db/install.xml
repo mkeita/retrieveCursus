@@ -6,18 +6,16 @@
   <TABLES>
     <TABLE NAME="retrievecourse" COMMENT="" >
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="courseid_old"/>
-        <FIELD NAME="courseid_old" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="courseid_new"/>
-        <FIELD NAME="courseid_new" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid_old" NEXT="shortname_course_old"/>
-        <FIELD NAME="shortname_course_old" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid_new" NEXT="shortname_course_old"/>
-       	 <FIELD NAME="shortname_course_new" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="shortname_course_old" NEXT="annac"/>
-        <FIELD NAME="annac" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="shortname_course_new" NEXT="plugin_user"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="courseId"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="shortname_course"/>
+        <FIELD NAME="shortname_course" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid" NEXT="annac"/>
+        <FIELD NAME="annac" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="shortname_course" NEXT="plugin_user"/>
      	<FIELD NAME="plugin_user" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="date" />
      	<FIELD NAME="date" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="plugin_user" />
       </FIELDS>
        <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this instance." NEXT="assignment"/>
-        <KEY NAME="assignment" TYPE="foreign" FIELDS="courseId" REFTABLE="course" REFFIELDS="id" PREVIOUS="primary"/>
+        <KEY NAME="assignment" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id" PREVIOUS="primary"/>
       </KEYS>
     </TABLE>
    </TABLES>

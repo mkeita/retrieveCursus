@@ -33,8 +33,8 @@ defined('MOODLE_INTERNAL') || die;
  * @param stdClass $course The course to object for the report
  * @param stdClass $context The context of the course
  */
-function report_retrievecursus_extend_navigation_course($navigation, $course, $context) {
-    if (has_capability('report/log:view', $context)) {
+function report_retrievecourse_extend_navigation_course($navigation, $course, $context) {
+    if (has_capability('report/retrievecourse:view', $context)) {
         $url = new moodle_url('/report/retrievecourse/index.php', array('id'=>$course->id));
         $navigation->add(get_string('pluginname', 'report_retrievecourse'), $url, navigation_node::TYPE_SETTING, null, null, new pix_icon('i/report', ''));
     }

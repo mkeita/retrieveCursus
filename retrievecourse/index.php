@@ -7,10 +7,10 @@ require_once 'classes/controller/ControllerFormTeacher.php';
 
 
 defined('MOODLE_INTERNAL') || die;
-session_start();
+
 $id   = optional_param('id', 0, PARAM_INT);// Course ID
 if($id != NULL){
-	$_SESSION['id'] = $id;	
+	#$_SESSION['id'] = $id;	
 }
 headerRetrieveCursus($id);
 
@@ -28,7 +28,8 @@ die();
 
 function headerRetrieveCursus($id){
 	global $PAGE , $OUTPUT ;
-	require_login($_SESSION['id']);
+	//require_login($_SESSION['id']);
+	require_login(2);
 	$PAGE->set_pagelayout('standard');
 	$PAGE->set_title("Retrieve Course");
 	$PAGE->set_heading("Retrieve Course");

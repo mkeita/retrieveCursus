@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die;
  * @global moodle_database $DB
  * @return void
  */
-function xmldb_report_retrievecursus_install() {
+function xmldb_report_retrievecourse_install() {
     global $DB;
 
 }

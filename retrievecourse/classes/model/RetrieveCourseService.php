@@ -5,7 +5,7 @@
  * @author Ilias
  *
  */
-class RetrieveCursusService {
+class RetrieveCourseService {
 	
 	public function backup($course){
 		

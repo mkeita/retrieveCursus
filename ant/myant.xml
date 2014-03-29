@@ -7,14 +7,14 @@
 
 	<target name="delete_moodle_files">
 		<echo message="Delete moodle files"/>
-	  	<delete dir="${moodle_dir}/report/retrievecursus" verbose="true"></delete>
+	  	<delete dir="${moodle_dir}/report/retrievecourse" verbose="true"></delete>
 	</target>
 	
 	<target name="copy_to_moodle" depends="delete_moodle_files">
 		<echo message="Send source files to moodle"/>
 	  	<copy todir="${moodle_dir}/report" overwrite="true" verbose="true">
 	    	<fileset dir=".">
-	        	<include name="**/retrievecursus/**"/>
+	        	<include name="**/retrievecourse/**"/>
 	    	</fileset>
 	  	</copy>
 	</target>

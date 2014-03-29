@@ -23,5 +23,15 @@ class ManageDB {
 		
 	}
 	
+	public function dropTable($table){
+		global $DB;
+		$dbman = $DB->get_manager();
+		$t = new xmldb_table($table);
+		if( $dbman->table_exists($table)){
+			echo 'supressionTable ' .$table .  '</br>';
+			$dbman->drop_table($t);
+		}
+	}
+	
 	
 }
