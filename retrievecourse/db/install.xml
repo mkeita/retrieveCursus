@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="report/retrievecourse/db" VERSION="20120830" COMMENT="XMLDB file for Moodle report/retrievecursus"
+<XMLDB PATH="report/retrievecourse/db" VERSION="20120830" COMMENT="XMLDB file for Moodle report/retrievecourse"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
     <TABLE NAME="retrievecourse" COMMENT="" >
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="courseId"/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="shortname_course"/>
-        <FIELD NAME="shortname_course" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid" NEXT="annac"/>
-        <FIELD NAME="annac" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="shortname_course" NEXT="plugin_user"/>
-     	<FIELD NAME="plugin_user" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="date" />
-     	<FIELD NAME="date" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="plugin_user" />
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="courseid_old"/>
+        <FIELD NAME="courseid_old" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="courseid_new"/>
+        <FIELD NAME="courseid_new" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid_old" NEXT="shortname_course"/>
+        <FIELD NAME="shortname_course" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid_new" NEXT="annac"/>
+        <FIELD NAME="annac" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="shortname_course" NEXT="user"/>
+     	<FIELD NAME="user" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="date" />
+     	<FIELD NAME="date" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="user" />
       </FIELDS>
        <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this instance." NEXT="assignment"/>
-        <KEY NAME="assignment" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id" PREVIOUS="primary"/>
+        <KEY NAME="assignment" TYPE="foreign" FIELDS="courseid_new" REFTABLE="course" REFFIELDS="id" PREVIOUS="primary"/>
       </KEYS>
     </TABLE>
    </TABLES>
