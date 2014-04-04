@@ -23,12 +23,12 @@ class ManageDB {
 	 * La fin du shortname.
 	 */
 	public function addCourse_retrievecourse($shortname , $temp){
-		global $DB;
+		global $DB;$USER;
 		$idCourse = $this->getCourseId($shortname);
 		if($idCourse != null ){
 				$this->deleteOldRetrieve();
 				$dataobject = array('courseid_old'=>$_SESSION['idCourse'] ,'courseid_new'=>$idCourse,'shortname_course'=>$shortname,
-						'annac'=>$temp ,'date'=>date('d-m-Y'));
+						'user'=>$USER->id, 'annac'=>$temp ,'date'=>date('d-m-Y'));
 				$DB->insert_record('retrievecourse', $dataobject);
 		} 
 	}
