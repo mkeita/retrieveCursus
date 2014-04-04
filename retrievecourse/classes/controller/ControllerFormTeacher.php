@@ -2,8 +2,12 @@
 
 require_once '/../model/ManageDB.php';
 require_once '/../view/FormTeacher.php';
-require_once '/../model/RetrieveCourseService.php';
-
+require_once '/../service/RetrieveCourseService.php';
+/**
+ * 
+ * @author Ilias
+ *
+ */
 class ControlleurFormTeacher {
 	/**
 	 * @var FormTeacher
@@ -20,6 +24,8 @@ class ControlleurFormTeacher {
 	 */
 	private $service;
 	
+	private $nextShortname;
+	
 	/**
 	 * 
 	 * @param FormTeacher $formTeacher
@@ -32,27 +38,29 @@ class ControlleurFormTeacher {
 	
 	
 	public function teacher_submit($nextShortName){
-		
+		$this->nextShortname = $nextShortName;
 		$infoForm = $this->formTeacher->get_data();
-		($infoForm->choice_teacher) ?   $this->choiceNewCourse($nextShortName) : $this->choiceRetrieve($nextShortName) ;
+		($infoForm->choice_teacher) ?   $this->choiceNewCourse() : $this->choiceRetrieve() ;
 		
 	}
 	
-	private function choiceRetrieve($nextShortname){
+	private function choiceRetrieve(){
 		global $USER;
 		echo 'retrieve </br>' ;
-		echo 'techer: ' . $nextShortname . '</br>';
-		$this->service = new RetrieveCourseService($_SESSION['idCourse'] , $USER->id , $nextShortname);
-		$this->service->backup();
-		echo '</br> début du restore </br>';
-		$this->service->restore();
-		
+		$this->service = new RetrieveCourseService($_SESSION['idCourse'] , $USER->id , $this->nextShortname);
+		$this->service->runService();
+		$this->savePluginUsed();	
 	}
 	
-	private function choiceNewCourse($nextShortName){
+	private function choiceNewCourse(){
 		 echo 'newcourse </br>' ;
-		 $temp = substr($nextShortName, -6);	
-		 $this->db->addCourse_retrievecourse($nextShortName , $temp);
+		 $this->savePluginUsed();	
+	}
+	
+	private function savePluginUsed(){
+		//TODO Il faudrait  faire un fichier config pour les différentes taille du temp du shortaname.
+		$temp = substr($this->nextShortname, -6);
+		$this->db->addCourse_retrievecourse($this->nextShortname , $temp);
 	}
 	
 	

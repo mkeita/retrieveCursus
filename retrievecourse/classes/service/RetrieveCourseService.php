@@ -3,8 +3,6 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
-var_dump($CFG->dirroot);
-
 
 //require('../../config.php');
 require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
@@ -63,20 +61,26 @@ class RetrieveCourseService {
 		$this->nextShortname = $nextShortname;
 	}
 	
-	public function backup(){
-
+	/**
+	 * Permet de lancer le backup du cour courant et le restore vers le cour de l'année suivante.
+	 */
+	public function runService(){
+		global $PAGE;
+		$this->backup();
+		$this->restore();
+	}
+	
+	
+	private function backup(){
 		$bc = new backup_controller(backup::TYPE_1COURSE, $this->course, backup::FORMAT_MOODLE,
 				backup::INTERACTIVE_YES, backup::MODE_GENERAL, $this->user);
 		$bc->finish_ui();
-		$bc->execute_plan();
-		
+		$bc->execute_plan();	
 		$bc->get_results();
-		$this->folder = $bc->get_backupid();
-		
-		
+		$this->folder = $bc->get_backupid();		
 	}
 	
-	public function restore(){
+	private function restore(){
 		global $DB,$CFG,$USER;
 		if($this->folder != NULL){
 			$courseId = $this->db->retieveCourseId($this->nextShortname);
@@ -96,7 +100,7 @@ class RetrieveCourseService {
 				$controller->destroy();
 				$transaction->allow_commit();
 			}else{
-				echo 'il y a un petit souci </br>';
+				die('il y a un petit souci </br>');
 			}
 			
 		}
