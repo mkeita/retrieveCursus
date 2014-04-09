@@ -2,8 +2,9 @@
 
 require_once '/../view/FormTeacher.php';
 require_once 'ControllerFormTeacher.php';
+require_once 'ControllerFormAdmin.php';
 require_once '/../model/ManageDB.php';
-
+require_once '/../view/FormAdmin.php';
 /**
  * 
  * @author Ilias
@@ -25,9 +26,15 @@ class ControllerPrincipal {
 	 * Verifie que toute les conditions sont rempli pour pouvoir utiliser le plugin.
 	 */
 	public function verification(){
-		$this->verifierCreationCour();
-		$this->verifierPluginUtilise();
-		$this->checkTeacherOfNextCourse();
+// 		for($i = 17 ; $i <= 20 ; $i++){
+// 			$this->db->dropRow($i);
+// 		}
+		if(!is_siteadmin()){
+			$this->verifierCreationCour();
+			$this->verifierPluginUtilise();
+			$this->checkTeacherOfNextCourse();
+		}
+		
 	}
 	
 	/**
@@ -39,7 +46,11 @@ class ControllerPrincipal {
 	
 	
 	private function adminDisplay(){
-		echo "administrateur </br>";
+		$formAdmin = new FormAdmin();
+		$controllerFormAdmin = new ControllerFormAdmin($formAdmin);
+		
+		($formAdmin->is_submitted()) ? $controllerFormAdmin->admin_submit() :$formAdmin->display();
+		
 	}
 	
 	
@@ -53,7 +64,7 @@ class ControllerPrincipal {
 	
 	/**
 	 * Cette fonction permet de crée le shortname de l'année académique suiavnate.
-	 * Cette fonction part du principe que les dernier caractére représent l' année académique.
+	 * Cette fonction part du principe que les derniers caractéres représentent l' année académique.
 	 * @param string $course
 	 * @return Le shortname du cour pour l'année académique suivante.
 	 */

@@ -6,7 +6,7 @@
 class ManageDB {
 	
 	/**
-	 * Cette méthode permet de vérifier qu'un cours existe
+	 * Cette méthode permet de vérifier qu'un cours existe à partir de son shortname.
 	 * @param string $course Le shortname du cours dont on veut vérifier l'existence.
 	 * @return vrai si le cour existe.
 	 */
@@ -16,18 +16,30 @@ class ManageDB {
 		return $DB->record_exists('course', array("shortname"=>$course));
 	}
 	
+
+	/**
+	 * Cette méthode permet de vérifier qu'un cours existe à partir de son id.
+	 * @param string $course Id du cours dont on veut vérifier l'existence.
+	 * @return vrai si le cour existe.
+	 */
+	public function checkIdCourseExist($course){
+		global $DB;
+		//"mdl_" est rajouté automatiquement à "course" -> table = mdl_course
+		return $DB->record_exists('course', array("id"=>$course));
+	}
+	
 	/**
 	 * Permet de rajouter dans la table 'retrievecourse' tout les cours qui ont déjà utilisé le plugin.
 	 * @param string $shortname
 	 * @param string $temp
 	 * La fin du shortname.
 	 */
-	public function addCourse_retrievecourse($shortname , $temp){
-		global $DB;$USER;
+	public function addCourse_retrievecourse($shortname , $temp , $courseid_old){
+		global $DB,$USER;
 		$idCourse = $this->getCourseId($shortname);
 		if($idCourse != null ){
 				$this->deleteOldRetrieve();
-				$dataobject = array('courseid_old'=>$_SESSION['idCourse'] ,'courseid_new'=>$idCourse,'shortname_course'=>$shortname,
+				$dataobject = array('courseid_old'=>$courseid_old ,'courseid_new'=>$idCourse,'shortname_course'=>$shortname,
 						'user'=>$USER->id, 'annac'=>$temp ,'date'=>date('d-m-Y'));
 				$DB->insert_record('retrievecourse', $dataobject);
 		} 
@@ -41,6 +53,12 @@ class ManageDB {
 		global $DB;
 		$data = $DB->get_record('course', array("shortname"=>$shortname), 'id');
 		return (($data != NULL) ? $data->id : NULL);
+	}
+	
+	public function getShortnameCourse($idCourse){
+		global $DB;
+		$data = $DB->get_record('course', array("id"=>$idCourse), 'shortname');
+		return (($data != NULL) ? $data->shortname : NULL);
 	}
 	
 	/**
@@ -98,6 +116,74 @@ class ManageDB {
 		return $userIsTecher;
 	}
 	
+	/**
+	 * Permet de récupérer tous les cours qui n'ont pas utilisés le plugin.
+	 * @param int $idCagtegorie id de la categorie . 
+	 * Quand idCatgeorie est différent de null , seul les cours appartenant à cette categorie seront récupérer.
+	 * @return Tableau associatif dont la clé est l'id du cours et la valeur le shortname du cours.
+	 */
+	public function courseNotUsedPugin($idCagtegorie=null){
+		global $DB;
+		$listeCours = array('-1'=>'All			');
+		$cond = ($idCagtegorie == null) ? '' : ' and category =' . $idCagtegorie;
+		$result = $DB->get_records_sql('SELECT mdl_course.id,mdl_course.shortname FROM mdl_course 
+				WHERE mdl_course.id NOT IN (SELECT mdl_retrievecourse.courseid_old FROM mdl_retrievecourse)' 
+				. $cond);
+		foreach ($result as $value){
+			//TODO Temp config
+			$temp = substr($value->shortname, -6);
+			//TODO Recuperer des config '201314'
+			if($temp == '201314'){
+				$listeCours[$value->id] = $value->shortname;
+			}			
+		}
+		return $listeCours;
+	}
+	
+	/**
+	 * Permet de rechercher tous les cours qui contiennent le mot et qui n'ont pas utilisés le plugin.
+	 * @param string $mot
+	 */
+	public function searchCourseNotUsedPlugin($search){
+		global $DB;
+		$listeCours = array('-1'=>'All			');
+		$result = $DB->get_records_sql('SELECT mdl_course.id,mdl_course.shortname FROM mdl_course
+				WHERE mdl_course.id NOT IN (SELECT mdl_retrievecourse.courseid_old FROM mdl_retrievecourse)
+				   and mdl_course.shortname LIKE \'%' . $search . '%\'');
+		
+		foreach ($result as $value){
+			//TODO Temp config
+			$temp = substr($value->shortname, -6);
+			//TODO Recuperer des config '201314'
+			if($temp == '201314'){
+				$listeCours[$value->id] = $value->shortname;
+			}
+		}
+		return $listeCours;
+	}
+	
+	
+	
+	public function getCategoryId($nameCategory){
+		global $DB;
+		$result = $DB->get_records_sql('SELECT id FROM mdl_course_categories WHERE name = \''. $nameCategory .'\'');
+		($result == NULL) ? NULL : $result->id ;
+	}
+	
+	/**
+	 * Permet de récupérer toute les catégorie
+	 * @return Tableau associatif dont la clé est l'id de la category et la valeur le nom de la categorie.
+	 */
+	public function retrieveCategories(){
+		global $DB;
+		$listeCategori = array('-1'=>'None');
+		$result = $DB->get_records_sql('SELECT id,name FROM mdl_course_categories');
+		foreach($result as $value){
+			$listeCategori[$value->id] = $value->name;
+		}
+		return $listeCategori;
+		
+	}
 	/**
 	 * Permet de verifier que l'utisateur est un professeur dans un context donné. 
 	 * @param int $contextid

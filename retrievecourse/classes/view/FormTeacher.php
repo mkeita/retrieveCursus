@@ -18,8 +18,6 @@ class FormTeacher extends moodleform {
 		$mform->closeHeaderBefore('end');
 		
 		$mform->addElement('header', 'header_', get_string('messageTeacherChoice','report_retrievecourse'));
-// 		$mform->addElement('advcheckbox', 'checkbox_recuperer', get_string('checkbox_recuperer', 'report_retrievecourse'), null, array('group' => 1), array(0, 1));
-// 		$mform->addElement('advcheckbox', 'checkbox_newcourse', get_string('checkbox_newcourse', 'report_retrievecourse'), null, array('group' => 1), array(0, 1));
 		$radioarray=array();
 		$radioarray[] =& $mform->createElement('radio', 'choice_teacher', ' ', get_string('checkbox_recuperer', 'report_retrievecourse'), 0, "retrieve");
 		$radioarray[] =& $mform->createElement('radio', 'choice_teacher', ' ', get_string('checkbox_newcourse', 'report_retrievecourse'), 1, "newcourse");

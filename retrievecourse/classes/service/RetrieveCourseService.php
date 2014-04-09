@@ -44,6 +44,9 @@ class RetrieveCourseService {
 	 */
 	private $db;
 	
+	public $currentProgress = 0;
+	public $step = 1;
+	
 	/**
 	 * Constructeur.
 	 * @param int $course
@@ -54,11 +57,13 @@ class RetrieveCourseService {
 	 *  Shortname du cour vers où se fera le restore.
 	 */
 	function __construct($course , $user , $nextShortname){
-		$this->course = $course;
-		$this->user = $user;
-		$this->folder = NULL;
 		$this->db = new ManageDB();
-		$this->nextShortname = $nextShortname;
+		$this->user = $user;
+		$this->setCourse($course);
+		
+		$this->folder = NULL;
+	
+		$this->setNextShortName($nextShortname);
 	}
 	
 	/**
@@ -66,10 +71,15 @@ class RetrieveCourseService {
 	 */
 	public function runService(){
 		global $PAGE;
-		$this->backup();
-		$this->restore();
-	}
+		if($this->course != NULL && $this->nextShortname != NULL ){
+			$this->backup();
+			$this->restore();
+		}else{
+			echo utf8_encode("Erreur!!!
+					Veuillez vérifier que le cours et le shortname entrer soit bien dans la base de donné");
+		}
 	
+	}
 	
 	private function backup(){
 		$bc = new backup_controller(backup::TYPE_1COURSE, $this->course, backup::FORMAT_MOODLE,
@@ -87,6 +97,7 @@ class RetrieveCourseService {
 			if($courseId != NULL){
 				$transaction = $DB->start_delegated_transaction();
 				$options = array();
+				//TODO Probleme des étudiant recupéré
 				$options['keep_roles_and_enrolments'] = 1;
 				$options['keep_groups_and_groupings'] = 0;
 				restore_dbops::delete_course_content($courseId, $options);
@@ -107,5 +118,67 @@ class RetrieveCourseService {
 		
 	}
 	
+	public function setCourse($idCourse){
+		if($idCourse != NULL && $this->db->checkIdCourseExist($idCourse)){
+			$this->course = $idCourse;
+		}
+	}
 	
+	public function setNextShortName($nextShortname){
+		if($nextShortname != NULL && $this->db->checkCourseExist($nextShortname)){
+			$this->nextShortname = $nextShortname;
+		}
+	}
+	
+	
+	
+}
+
+class WebCTServiceLogger extends base_logger {
+
+	protected function action($message, $level, $options = null) {
+		$prefix = $this->get_prefix($level, $options);
+		$depth = isset($options['depth']) ? $options['depth'] : 0;
+		// Depending of running from browser/command line, format differently
+		error_log($prefix . str_repeat('  ', $depth) . $message);
+		//      ob_flush();
+		// 		flush();
+		return true;
+	}
+}
+
+class WebCTServiceProgress extends core_backup_progress {
+
+	/**
+	 * @var WebCTServiceLogger
+	 */
+	protected $logger;
+
+	protected $currentProgress;
+	protected $step;
+
+	public function __construct($logger,$currentProgress=0, $step=1) {
+		$this->logger=$logger;
+
+		$this->currentProgress=$currentProgress;
+		$this->step = $step;
+	}
+
+	public function update_progress() {
+		if($this->is_in_progress_section()){
+			$range = $this->get_progress_proportion_range();
+			//			$this->logger->process($this->get_current_description().' ==> '.$range[0].'-'.$range[1], backup::LOG_DEBUG);
+			//$this->logger->process(var_dump(), backup::LOG_DEBUG);
+				
+			$progress = $this->currentProgress + $range[1]*100*$this->step;
+				
+			echo "<script>";
+			echo "document.getElementById('pourcentage').innerHTML='".$progress."%';";
+			echo "document.getElementById('barre').style.width='".$progress."%';";
+			echo "document.getElementById('progress_bar_description').innerHTML='".$this->get_current_description()."';";
+			echo "</script>";
+			//ob_flush();
+			flush();
+		}
+	}
 }

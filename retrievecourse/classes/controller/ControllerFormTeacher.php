@@ -60,7 +60,7 @@ class ControlleurFormTeacher {
 	private function savePluginUsed(){
 		//TODO Il faudrait  faire un fichier config pour les différentes taille du temp du shortaname.
 		$temp = substr($this->nextShortname, -6);
-		$this->db->addCourse_retrievecourse($this->nextShortname , $temp);
+		$this->db->addCourse_retrievecourse($this->nextShortname , $temp , $_SESSION['idCourse']);
 	}
 	
 	
