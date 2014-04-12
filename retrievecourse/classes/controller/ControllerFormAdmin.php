@@ -3,6 +3,9 @@
 
 require_once '/../view/FormAdmin.php';
 require_once '/../service/RetrieveCourseService.php';
+
+
+
 /**
  * 
  * @author Ilias
@@ -24,20 +27,16 @@ class ControllerFormAdmin {
 		global $PAGE;
 		if(!$this->formAdmin->is_cancelled()){
 			$infoForm = $this->formAdmin->get_data();
-			var_dump($infoForm);
 			($infoForm->choice_type_backup) ? $this->choiceBackupImmediately($infoForm->cours) : $this->choiceUseCron();
 		}else{
 			redirect("../..");
-		}
-		
+		}	
 		
 	}
 	
 	function choiceUseCron(){
 		global $PAGE;
-		if($this->confirm(utf8_encode("êtes-vous certain de vouloir démarrer le backup/restore via cron?"))){
 			
-		}
 		redirect($PAGE->url);
 	}
 	/**
@@ -46,23 +45,16 @@ class ControllerFormAdmin {
 	 */
 	private function choiceBackupImmediately($cours){
 		global $USER,$OUTPUT,$PAGE;
-		if($this->confirm(utf8_encode("êtes-vous certain de vouloir démarrer le backup/restore immédiatement?"))){
-			$service = new RetrieveCourseService(null , $USER->id , null);
-			if($cours[0] == '-1'){
-				foreach($this->formAdmin->getListeCour() as $key=> $value){
-					//TODO Eventuellement supprime le ALL de la lise dans post_data_definition.
-					if($key != -1){
-						$this->service($service, $key, $value);
-					}
-				}
-			}else{
-				foreach ($cours as $value){
-					$this->service($service, $value, $this->db->getShortnameCourse($value));
-				}
-			}
-		}
-		redirect($PAGE->url);
 		
+		//Dans le cas où on a coché All.
+		if($cours[0] == -1){
+			//Enléve toute les valeur pour que le type de tableau est identique qu'on séléctionne all ou plusieur cour.
+			$cours = array_keys($this->formAdmin->getListeCour());
+		}	
+		$message = 'Are you sur?';
+		$json = json_encode($cours);
+		echo $OUTPUT->confirm($message, '/report/retrievecourse/index.php?confirmation=backup_immediat&cour='.$json
+				, '/report/retrievecourse/index.php');
 	}
 	
 	private function service($service,$idCourse,$shortname){
@@ -70,7 +62,7 @@ class ControllerFormAdmin {
 		$service->setNextShortName($this->nextShortname($shortname));
 		$service->runService();
 		$temp = substr($this->nextShortname($shortname), -6);
-		$this->db->addCourse_retrievecourse($this->nextShortname($shortname) , $temp , $idCourse);
+		$this->db->addCourse_retrievecourse($shortname , $this->nextShortname($shortname) , $temp , $idCourse);
 	}
 	//TODO Chercher un moyen pour pas dédoubler la méthode.
 	/**
@@ -90,13 +82,6 @@ class ControllerFormAdmin {
 		return $newShortname;
 	}
 	
-	private function confirm($message){
-		?> 
-		<script type="text/javascript">
-			var conf = confirm('<?php echo $message; ?>');
-		</script>
-		<?php 
-		$valRet = "<script language='Javascript'> document.write(conf); </script>";
-		return ($valRet == "true") ? true : false ;
-	}
+	
+	
 }

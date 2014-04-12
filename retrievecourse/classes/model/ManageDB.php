@@ -34,14 +34,14 @@ class ManageDB {
 	 * @param string $temp
 	 * La fin du shortname.
 	 */
-	public function addCourse_retrievecourse($shortname , $temp , $courseid_old){
+	public function addCourse_retrievecourse($shortname_old , $shortname_new , $temp , $courseid_old , $flag_newcourse = 0){
 		global $DB,$USER;
-		$idCourse = $this->getCourseId($shortname);
+	   $idCourse = $this->getCourseId($shortname_new);
 		if($idCourse != null ){
-				$this->deleteOldRetrieve();
-				$dataobject = array('courseid_old'=>$courseid_old ,'courseid_new'=>$idCourse,'shortname_course'=>$shortname,
-						'user'=>$USER->id, 'annac'=>$temp ,'date'=>date('d-m-Y'));
-				$DB->insert_record('retrievecourse', $dataobject);
+$this->deleteOldRetrieve();
+$dataobject = array('courseid_old'=>$courseid_old ,'courseid_new'=>$idCourse,'shortname_course_old'=>$shortname_old,
+		'shortname_course_new'=>$shortname_new,'user'=>$USER->id, 'annac'=>$temp ,'date'=>date('d-m-Y'),'flag_newcourse'=> $flag_newcourse);
+$DB->insert_record('retrievecourse', $dataobject);
 		} 
 	}
 	/**

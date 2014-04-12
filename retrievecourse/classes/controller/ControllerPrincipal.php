@@ -26,7 +26,7 @@ class ControllerPrincipal {
 	 * Verifie que toute les conditions sont rempli pour pouvoir utiliser le plugin.
 	 */
 	public function verification(){
-// 		for($i = 17 ; $i <= 20 ; $i++){
+// 		for($i = 42 ; $i <= 45 ; $i++){
 // 			$this->db->dropRow($i);
 // 		}
 		if(!is_siteadmin()){

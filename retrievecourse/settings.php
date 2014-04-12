@@ -25,9 +25,8 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-
 // just a link to course report
-#$ADMIN->add('reports', new admin_externalpage('reportretrievecourse', get_string('pluginname', 'report_retrievecourse'), "$CFG->wwwroot/report/retrievecourse/index.php?id=".SITEID, 'report/retrievecourse:view'));
+$ADMIN->add('reports', new admin_externalpage('reportretrievecourse', get_string('pluginname', 'report_retrievecourse'), "$CFG->wwwroot/report/retrievecourse/index.php", 'report/retrievecourse:view'));
 
 // no report settings
 $settings = null;

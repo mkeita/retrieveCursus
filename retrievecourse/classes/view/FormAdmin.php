@@ -48,6 +48,7 @@ class FormAdmin extends moodleform{
 		$mform->closeHeaderBefore('end');
 		
 		$this->add_action_buttons(true, get_string('submit'));
+		
 	}
 	
 	public function getListeCour(){

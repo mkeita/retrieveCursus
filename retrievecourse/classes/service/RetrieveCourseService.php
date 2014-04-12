@@ -7,6 +7,8 @@ global $CFG;
 //require('../../config.php');
 require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
+require_once($CFG->dirroot . '/backup/moodle2/backup_plan_builder.class.php');
+require_once($CFG->dirroot . '/backup/util/ui/import_extensions.php');
 require_once '/../model/ManageDB.php';
 
 /**
@@ -72,7 +74,13 @@ class RetrieveCourseService {
 	public function runService(){
 		global $PAGE;
 		if($this->course != NULL && $this->nextShortname != NULL ){
+			echo 'Backup <br/>';
+			ob_flush();
+			flush();
 			$this->backup();
+			echo 'Restore </br>';
+			ob_flush();
+			flush();
 			$this->restore();
 		}else{
 			echo utf8_encode("Erreur!!!
@@ -82,12 +90,29 @@ class RetrieveCourseService {
 	}
 	
 	private function backup(){
+		global $CFG,$PAGE;
+		
+		
 		$bc = new backup_controller(backup::TYPE_1COURSE, $this->course, backup::FORMAT_MOODLE,
 				backup::INTERACTIVE_YES, backup::MODE_GENERAL, $this->user);
+		
+		$backup = new import_ui($bc);
+		// Process the current stage
+		$backup->process();
+		
+		$logger = new WebCTServiceLogger($CFG->debugdeveloper ? backup::LOG_DEBUG : backup::LOG_INFO);
+	    $progress = new WebCTServiceProgress($logger,$this->currentProgress,$this->step);
+	    $progress->start_progress('', 2);
+		$backup->get_controller()->set_progress($progress);
+		$backup->get_controller()->add_logger($logger);
+		
 		$bc->finish_ui();
 		$bc->execute_plan();	
 		$bc->get_results();
-		$this->folder = $bc->get_backupid();		
+		$this->folder = $bc->get_backupid();
+		$this->currentProgress = $progress->getCurrentProgress();	
+		var_dump($this->currentProgress);
+		flush();	
 	}
 	
 	private function restore(){
@@ -103,9 +128,16 @@ class RetrieveCourseService {
 				restore_dbops::delete_course_content($courseId, $options);
 				$transaction->allow_commit();				
 				$transaction = $DB->start_delegated_transaction();
+				
+				$logger = new WebCTServiceLogger($CFG->debugdeveloper ? backup::LOG_DEBUG : backup::LOG_INFO);
+				$progress = new WebCTServiceProgress($logger, $this->currentProgress, $this->step);
+				
+				
 				$controller = new restore_controller($this->folder, $courseId,
 						backup::INTERACTIVE_NO, backup::MODE_SAMESITE, $USER->id,
-						 backup::TARGET_EXISTING_DELETING);
+						 backup::TARGET_EXISTING_DELETING,$progress);
+				$controller->add_logger($logger);
+				
 				$controller->execute_precheck();
 				$controller->execute_plan();
 				$controller->destroy();
@@ -163,8 +195,14 @@ class WebCTServiceProgress extends core_backup_progress {
 		$this->currentProgress=$currentProgress;
 		$this->step = $step;
 	}
-
+	
+	public function getCurrentProgress(){
+		return $this->currentProgress;
+	}
+	
 	public function update_progress() {
+		
+		
 		if($this->is_in_progress_section()){
 			$range = $this->get_progress_proportion_range();
 			//			$this->logger->process($this->get_current_description().' ==> '.$range[0].'-'.$range[1], backup::LOG_DEBUG);
@@ -175,7 +213,7 @@ class WebCTServiceProgress extends core_backup_progress {
 			echo "<script>";
 			echo "document.getElementById('pourcentage').innerHTML='".$progress."%';";
 			echo "document.getElementById('barre').style.width='".$progress."%';";
-			echo "document.getElementById('progress_bar_description').innerHTML='".$this->get_current_description()."';";
+		//	echo "document.getElementById('progress_bar_description').innerHTML='".$this->get_current_description()."';";
 			echo "</script>";
 			//ob_flush();
 			flush();
