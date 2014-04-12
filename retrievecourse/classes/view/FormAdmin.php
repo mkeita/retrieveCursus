@@ -32,7 +32,10 @@ class FormAdmin extends moodleform{
 			 	$this->listeCour = $db->courseNotUsedPugin($idCategory);
 			 }		
 		}
-		$formTrie->display();
+		if(!$this->is_submitted() && !$this->is_cancelled()){
+			$formTrie->display();
+		}
+		
 		
 		//TODO Faire les verification de départ pour chacun des éléments avant de les placer dans le select.
 		$mform->addElement('header', 'header_admin', get_string('header_admin','report_retrievecourse'));

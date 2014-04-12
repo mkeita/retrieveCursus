@@ -74,13 +74,7 @@ class RetrieveCourseService {
 	public function runService(){
 		global $PAGE;
 		if($this->course != NULL && $this->nextShortname != NULL ){
-			echo 'Backup <br/>';
-			ob_flush();
-			flush();
 			$this->backup();
-			echo 'Restore </br>';
-			ob_flush();
-			flush();
 			$this->restore();
 		}else{
 			echo utf8_encode("Erreur!!!
@@ -91,8 +85,9 @@ class RetrieveCourseService {
 	
 	private function backup(){
 		global $CFG,$PAGE;
-		
-		
+		echo "<script>";
+		echo "document.getElementById('progress_bar_course').innerHTML='Backup du cour : ".$this->db->getShortnameCourse($this->course)."';";
+		echo "</script>";
 		$bc = new backup_controller(backup::TYPE_1COURSE, $this->course, backup::FORMAT_MOODLE,
 				backup::INTERACTIVE_YES, backup::MODE_GENERAL, $this->user);
 		
@@ -102,7 +97,7 @@ class RetrieveCourseService {
 		
 		$logger = new WebCTServiceLogger($CFG->debugdeveloper ? backup::LOG_DEBUG : backup::LOG_INFO);
 	    $progress = new WebCTServiceProgress($logger,$this->currentProgress,$this->step);
-	    $progress->start_progress('', 2);
+	    $progress->start_progress('', 1);
 		$backup->get_controller()->set_progress($progress);
 		$backup->get_controller()->add_logger($logger);
 		
@@ -110,14 +105,15 @@ class RetrieveCourseService {
 		$bc->execute_plan();	
 		$bc->get_results();
 		$this->folder = $bc->get_backupid();
-		$this->currentProgress = $progress->getCurrentProgress();	
-		var_dump($this->currentProgress);
-		flush();	
+		$this->currentProgress = $progress->getProgress();	
 	}
 	
 	private function restore(){
 		global $DB,$CFG,$USER;
 		if($this->folder != NULL){
+			echo "<script>";
+			echo "document.getElementById('progress_bar_course').innerHTML='Restauration vers le cour : ".$this->nextShortname."';";
+			echo "</script>";
 			$courseId = $this->db->retieveCourseId($this->nextShortname);
 			if($courseId != NULL){
 				$transaction = $DB->start_delegated_transaction();
@@ -188,16 +184,19 @@ class WebCTServiceProgress extends core_backup_progress {
 
 	protected $currentProgress;
 	protected $step;
+	
+	private $progress;
 
 	public function __construct($logger,$currentProgress=0, $step=1) {
 		$this->logger=$logger;
 
 		$this->currentProgress=$currentProgress;
+		
 		$this->step = $step;
 	}
 	
-	public function getCurrentProgress(){
-		return $this->currentProgress;
+	public function getProgress(){
+		return $this->progress;
 	}
 	
 	public function update_progress() {
@@ -208,12 +207,12 @@ class WebCTServiceProgress extends core_backup_progress {
 			//			$this->logger->process($this->get_current_description().' ==> '.$range[0].'-'.$range[1], backup::LOG_DEBUG);
 			//$this->logger->process(var_dump(), backup::LOG_DEBUG);
 				
-			$progress = $this->currentProgress + $range[1]*100*$this->step;
+			$this->progress = $this->currentProgress + $range[1]*100*$this->step;
 				
 			echo "<script>";
-			echo "document.getElementById('pourcentage').innerHTML='".$progress."%';";
-			echo "document.getElementById('barre').style.width='".$progress."%';";
-		//	echo "document.getElementById('progress_bar_description').innerHTML='".$this->get_current_description()."';";
+			echo "document.getElementById('pourcentage').innerHTML='".$this->progress."%';";
+			echo "document.getElementById('barre').style.width='".$this->progress."%';";
+			echo "document.getElementById('progress_bar_description').innerHTML='".$this->get_current_description()."';";
 			echo "</script>";
 			//ob_flush();
 			flush();

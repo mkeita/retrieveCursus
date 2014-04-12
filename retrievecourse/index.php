@@ -8,14 +8,15 @@ require_once 'classes/service/RetrieveCourseService.php';
 require_once 'classes/model/ManageDB.php';
 
 defined('MOODLE_INTERNAL') || die;
-$progressBar = 	'<div id="conteneur" style="display:none; background-color:transparent; width:80%; border:1px solid #000000;">
+$progressBar = 	'<div id="conteneur" style="display:block; background-color:transparent; width:80%; border:1px solid #000000;">
 					<div id="barre" style="display:block; background-color:rgba(132, 232, 104, 0.7); width:0%; height:100%;float:top;clear : top ;clear:both">
 						<div id="pourcentage" style="text-align:right; height:100%; font-size:1.8em;">
 							&nbsp;
 						</div>
 					</div>
 				</div>
-				<label id="progress_bar_description"></label>';
+				<label id="progress_bar_description"></label></br>
+				<label id="progress_bar_course"></label>';
 
 $id   = optional_param('id', 0, PARAM_INT);// Course ID
 $confirm = optional_param('confirmation', 0, PARAM_TEXT);// Course ID
@@ -29,7 +30,6 @@ headerRetrieveCursus();
 
 if($confirm != NULL && $courJson != NULL){
 	echo $progressBar;
-	activerAffichage();
 	backup_immediat($courJson);
 	
 }else{
@@ -75,7 +75,6 @@ function backup_immediat($courJson){
 		}
 		$indice += 100 /(count($nbElemRestore)*2 );
 	}
-//	progression($indice);
 }
 
 //TODO Chercher un moyen pour pas dédoubler la méthode.
