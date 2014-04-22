@@ -29,19 +29,33 @@ class ManageDB {
 	}
 	
 	/**
+	 * Permet de rajouter dans la table 'retrievecourse_cron'.
+	 * @param int $idCourse
+	 * @param int $userid
+	 * @param string $nextShortname
+	 */
+	public function addCourse_cron($idCourse, $userid , $nextShortname){
+		global $DB;
+		$dataobject = array('courseid'=>$idCourse , 'user'=>$userid , 'shortname_course_new'=>$nextShortname , 'status'=>0,
+				 'time_created'=> time() , 'tentative' => 0);
+		$DB->insert_record('retrievecourse_cron', $dataobject);
+	}
+	
+	/**
 	 * Permet de rajouter dans la table 'retrievecourse' tout les cours qui ont déjà utilisé le plugin.
 	 * @param string $shortname
 	 * @param string $temp
 	 * La fin du shortname.
 	 */
-	public function addCourse_retrievecourse($shortname_old , $shortname_new , $temp , $courseid_old , $flag_newcourse = 0){
+	public function addCourse_retrievecourse($shortname_old , $shortname_new , $temp , $courseid_old , $flag_newcourse=0 , $flag_wait_cron=0 , $flag_use_cron=0){
 		global $DB,$USER;
 	   $idCourse = $this->getCourseId($shortname_new);
 		if($idCourse != null ){
-$this->deleteOldRetrieve();
-$dataobject = array('courseid_old'=>$courseid_old ,'courseid_new'=>$idCourse,'shortname_course_old'=>$shortname_old,
-		'shortname_course_new'=>$shortname_new,'user'=>$USER->id, 'annac'=>$temp ,'date'=>date('d-m-Y'),'flag_newcourse'=> $flag_newcourse);
-$DB->insert_record('retrievecourse', $dataobject);
+		//$this->deleteOldRetrieve();
+		$dataobject = array('courseid_old'=>$courseid_old ,'courseid_new'=>$idCourse,'shortname_course_old'=>$shortname_old,
+				'shortname_course_new'=>$shortname_new,'user'=>$USER->id, 'annac'=>$temp ,'date'=>date('d-m-Y'),
+				'flag_newcourse'=> $flag_newcourse , 'flag_use_cron'=>$flag_use_cron , 'flag_wait_cron_execute'=>$flag_wait_cron);
+		$DB->insert_record('retrievecourse', $dataobject);
 		} 
 	}
 	/**
@@ -53,6 +67,32 @@ $DB->insert_record('retrievecourse', $dataobject);
 		global $DB;
 		$data = $DB->get_record('course', array("shortname"=>$shortname), 'id');
 		return (($data != NULL) ? $data->id : NULL);
+	}
+	
+	public function getRetrievecourseId($courseid_old){
+		global $DB;
+		$data = $DB->get_record('retrievecourse', array("courseid_old"=>$courseid_old), 'id');
+		return (($data != NULL) ? $data->id : NULL);
+	}
+	
+	public function updateFlagWaitCronExecute($id , $flag){
+		global $DB;
+		$dataobject = array('id'=>$id , "flag_wait_cron_execute"=>$flag);
+		return $DB->update_record('retrievecourse', $dataobject);
+	}
+	
+	public function updateFlagUseCron($id , $flag){
+		global $DB;
+		$dataobject = array('id'=>$id , "flag_use_cron"=>$flag);
+		return $DB->update_record('retrievecourse', $dataobject);
+	}
+	
+	public function cronFinish($idCron , $courseid_old){
+		 $id = $this->getRetrievecourseId($courseid_old);
+		 if($id != NULL){
+		 	$this->updateFlagWaitCronExecute($id, false);
+		 	$this->updateFlagUseCron($id, true);
+		 }
 	}
 	
 	public function getShortnameCourse($idCourse){
@@ -96,7 +136,53 @@ $DB->insert_record('retrievecourse', $dataobject);
 		return $used; 
 	}
 	
+	/**
+	 * Permet de récupérer tous les id , courseid , shortname et userid de la table retrievecourse_cron;
+	 * @return multitype: tableau associatif.
+	 */
+	public function retrieveCron(){
+		global $DB;
+		$result = $DB->get_records_sql('SELECT id,courseid,shortname_course_new,user FROM mdl_retrievecourse_cron');
+		return $result;
+	}
 	
+	public function updateFlagStatus($id , $flag_execute){
+		global $DB;
+		$dataobject = array('id'=>$id , "status"=>$flag_execute);
+		return $DB->update_record('retrievecourse_cron', $dataobject);
+	}
+	
+	
+	public function updateNbTentative($id , $tentative){
+		global $DB;
+		$dataobject = array('id'=>$id , "tentative"=>$tentative);
+		return $DB->update_record('retrievecourse_cron', $dataobject);
+	}
+	
+	public function getCronTentative($id){
+		global $DB;
+		$data = $DB->get_record('retrievecourse_cron',  array("id"=>$id), 'tentative');
+		return (($data != NULL) ? $data->tentative : NULL);
+	}
+	
+	public function getFlagStatus($id){
+		global $DB;
+		$data = $DB->get_record('retrievecourse_cron',  array("id"=>$id), 'status');
+		return (($data != NULL) ? $data->status : NULL);
+	}
+	
+	public function deleteCron($id){
+		global $DB;
+		return $DB->delete_records('retrievecourse_cron', array("id"=>$id));
+	}
+	
+	
+	
+	public function updateTimeStart($id , $time){
+		global $DB;
+		$dataobject = array('id'=>$id , "time_start"=>$time);
+		return $DB->update_record('retrievecourse_cron', $dataobject);
+	}
 	
 	/**
 	 * Permet de vérifier qu'un professeur est bien inscrit dans un cours et qu'il est professeur pour ce cour.
@@ -117,28 +203,39 @@ $DB->insert_record('retrievecourse', $dataobject);
 	}
 	
 	/**
-	 * Permet de récupérer tous les cours qui n'ont pas utilisés le plugin.
+	 * Permet de récupérer tous les cours qui n'ont pas utilisés le plugin et qui appartienne à l'année académique courante.
 	 * @param int $idCagtegorie id de la categorie . 
 	 * Quand idCatgeorie est différent de null , seul les cours appartenant à cette categorie seront récupérer.
 	 * @return Tableau associatif dont la clé est l'id du cours et la valeur le shortname du cours.
 	 */
 	public function courseNotUsedPugin($idCagtegorie=null){
-		global $DB;
+		global $DB,$CFG;
 		$listeCours = array('-1'=>'All			');
 		$cond = ($idCagtegorie == null) ? '' : ' and category =' . $idCagtegorie;
 		$result = $DB->get_records_sql('SELECT mdl_course.id,mdl_course.shortname FROM mdl_course 
 				WHERE mdl_course.id NOT IN (SELECT mdl_retrievecourse.courseid_old FROM mdl_retrievecourse)' 
 				. $cond);
+		$tempSize = $CFG->tempYearOne + $CFG->tempYearTwo;
+		
 		foreach ($result as $value){
-			//TODO Temp config
-			$temp = substr($value->shortname, -6);
-			//TODO Recuperer des config '201314'
-			if($temp == '201314'){
+			$temp = substr($value->shortname, -$tempSize);
+			if($temp == $CFG->temp){
 				$listeCours[$value->id] = $value->shortname;
 			}			
 		}
 		return $listeCours;
 	}
+	
+	public function getNbCourse(){
+		global $DB, $CFG;
+		$tempSize = $CFG->tempYearOne + $CFG->tempYearTwo;
+		$result = $DB->get_records_sql('SELECT COUNT(*) FROM mdl_course
+				WHERE SUBSTR(shortname, -'. $tempSize.') = '. $CFG->temp);
+		var_dump($result);
+		return $result;
+	}
+	
+	
 	
 	/**
 	 * Permet de rechercher tous les cours qui contiennent le mot et qui n'ont pas utilisés le plugin.
@@ -162,11 +259,49 @@ $DB->insert_record('retrievecourse', $dataobject);
 		return $listeCours;
 	}
 	
+	public function checkUserExist($userid){
+		global $DB;
+		$used = $DB->record_exists('user', array("id"=>$userid));
+		return $used;
+	}
 	
+	/**
+	 * Récupére le champs 'time_modified' de la table 'retrievecourse_cron' .
+	 * @param $id
+	 * @return le time_modified ou null dans le cas où l'id entré n'existe pas.
+	 */
+	public function getTimeModifiedCron($id){
+		global $DB;
+		$param = array('id'=> $id);
+		$result = $DB->get_records_sql('SELECT time_modified FROM mdl_retrievecourse_cron WHERE id = :id',$param);
+		($result == NULL) ? NULL : $result->time_modified ;
+	}
+	
+	/**
+	 * Permet de modifier le champs timeModified.
+	 * @param unknown $id L'id du tuple qu'il faut modifier.
+	 * @param unknown $timeModified La nouvelle valeur de timeModified.
+	 * @return boolean vrai si la modification a été effectué.
+	 */
+	public function updateTimeModifiedCron($id , $timeModified){
+		global $DB;
+		$dataobject = array('id'=>$id , "time_modified"=>$timeModified);	
+		return $DB->update_record('retrievecourse_cron', $dataobject);
+	}
+	/**
+	 * Permet de récupérer l'id de la table cron qui est en cour de backup/restore.
+	 * @return NULL dans le cas où aucun cours n'est en cours de backup/restore avec cron.
+	 */
+	public function getIdCronRunning(){
+		global $DB;
+		$obj = $DB->get_records_sql('SELECT id from mdl_retrievecourse_cron WHERE mdl_retrievecourse_cron.status = 1');
+		return ($obj == NULL) ? NULL : $obj[0]->id;
+	}
 	
 	public function getCategoryId($nameCategory){
 		global $DB;
-		$result = $DB->get_records_sql('SELECT id FROM mdl_course_categories WHERE name = \''. $nameCategory .'\'');
+		$param = array('nameCategory'=>$nameCategory);
+		$result = $DB->get_records_sql('SELECT id FROM mdl_course_categories WHERE name = :nameCategory',$param);
 		($result == NULL) ? NULL : $result->id ;
 	}
 	
@@ -227,6 +362,8 @@ $DB->insert_record('retrievecourse', $dataobject);
 		global $DB;
 		$DB->delete_records('retrievecourse', array("id"=>$id));
 	}
+	
+	
 	
 	public function dropTable($table){
 		global $DB;

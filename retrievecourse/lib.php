@@ -39,3 +39,20 @@ function report_retrievecourse_extend_navigation_course($navigation, $course, $c
         $navigation->add(get_string('pluginname', 'report_retrievecourse'), $url, navigation_node::TYPE_SETTING, null, null, new pix_icon('i/report', ''));
     }
 }
+
+
+function report_retrievecourse_cron() {
+	global $CFG;
+	
+	mtrace("retrievecourse");
+	
+	require_once 'classes/service/cronService.php';
+	
+	$cronService = new cronService();
+	
+	if($cronService->checkLaunchBackupRestore()){
+		$cronService->launchBackupRestore();
+	}
+}
+
+

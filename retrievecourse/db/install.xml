@@ -13,8 +13,10 @@
          <FIELD NAME="shortname_course_new" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="shortname_course_old" NEXT="annac"/>
         <FIELD NAME="annac" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="shortname_course_new" NEXT="user"/>
      	<FIELD NAME="user" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="date" />
-     	<FIELD NAME="date" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="user" NEXT="flag_newCourse"/>
-        <FIELD NAME="flag_newCourse" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="date"  />
+     	<FIELD NAME="date" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="user" NEXT="flag_newcourse"/>
+        <FIELD NAME="flag_newcourse" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="date"  />
+        <FIELD NAME="flag_use_cron" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"  />
+        <FIELD NAME="flag_wait_cron_execute" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="date"  />
       </FIELDS>
        <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this instance." NEXT="assignment"/>
@@ -26,7 +28,12 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="courseid"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="shortname_course_new"/>
         <FIELD NAME="shortname_course_new" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid" NEXT="user"/>
-     	<FIELD NAME="user" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="date" />
+     	<FIELD NAME="user" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"  />
+     	<FIELD NAME="status" TYPE="text"  NOTNULL="false"  SEQUENCE="false" COMMENT="flag qui permet de savoir si ce cour est en cour de backup/restore"/>
+      	<FIELD NAME="time_created" TYPE="text" NOTNULL="false" SEQUENCE="false" />
+      	<FIELD NAME="time_start" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Heure à laquelle cron à démarrer le backup"/>
+      	<FIELD NAME="time_modified" TYPE="text" NOTNULL="false" SEQUENCE="false" />
+      	<FIELD NAME="tentative" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
        <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this instance." NEXT="assignment"/>

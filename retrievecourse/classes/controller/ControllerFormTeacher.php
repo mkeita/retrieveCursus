@@ -46,22 +46,26 @@ class ControlleurFormTeacher {
 	
 	private function choiceRetrieve(){
 		global $USER;
-		echo 'retrieve </br>' ;
-		$this->service = new RetrieveCourseService($_SESSION['idCourse'] , $USER->id , $this->nextShortname);
-		$this->service->runService();
-		$this->savePluginUsed();	
+		$this->db->addCourse_cron($_SESSION['idCourse'], $USER->id , $this->nextShortname);
+		$this->courseUsePlugin(0, 1);
+		
 	}
 	
 	private function choiceNewCourse(){
-		 echo 'newcourse </br>' ;
-		 $this->savePluginUsed();	
+		$this->courseUsePlugin(1, 0);
+		
 	}
 	
-	private function savePluginUsed(){
-		//TODO Il faudrait  faire un fichier config pour les différentes taille du temp du shortaname.
-		$temp = substr($this->nextShortname, -6);
-		$this->db->addCourse_retrievecourse($this->nextShortname , $temp , $_SESSION['idCourse']);
+	/**
+	 * Permet d'enregistrer le cour dans la table 'retrievecourse'.
+	 * @param int $flag_newcourse Vaut 1 si c'est on commence un nouveau cour.
+	 */
+	private function courseUsePlugin($flag_newcourse , $flag_wait_cron){
+		global $CFG;
+		$shortname = $this->db->getShortnameCourse($_SESSION['idCourse']);
+		$taille = $CFG->tempYearOne + $CFG->tempYearTwo ; 
+		$temp = substr($shortname, -$taille );
+		$this->db->addCourse_retrievecourse($shortname , $this->nextShortname , $temp , $_SESSION['idCourse'] , $flag_newcourse , $flag_wait_cron );
 	}
-	
 	
 }

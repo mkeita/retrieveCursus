@@ -5,7 +5,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
 require_once '/../model/ManageDB.php';
+require_once '/../model/ManageGraphiqueDB.php';
 require_once 'FormTrie.php';
+require_once '/../service/Graphique.php';
 
 /**
  * Permet de gérer la vue qui apparaît lorsque l'utilisateur est un administrateur .
@@ -32,11 +34,10 @@ class FormAdmin extends moodleform{
 			 	$this->listeCour = $db->courseNotUsedPugin($idCategory);
 			 }		
 		}
-		if(!$this->is_submitted() && !$this->is_cancelled()){
-			$formTrie->display();
-		}
+		$formTrie->display();
 		
 		
+		$this->creationGraphique($mform);
 		//TODO Faire les verification de départ pour chacun des éléments avant de les placer dans le select.
 		$mform->addElement('header', 'header_admin', get_string('header_admin','report_retrievecourse'));
 		
@@ -53,6 +54,38 @@ class FormAdmin extends moodleform{
 		$this->add_action_buttons(true, get_string('submit'));
 		
 	}
+	
+	private function creationGraphique($mform){
+		$mform->addElement('header', 'header_statistique', get_string('header_statistique','report_retrievecourse'));
+		$mform->addElement('html',get_string('debut_graphique_div','report_retrievecourse'));
+		$mform->addElement('html',get_string('graphique_admin','report_retrievecourse'));
+		$mform->addElement('html',get_string('graphique_prof','report_retrievecourse'));
+		$mform->addElement('html',get_string('graphique_usingPlugin','report_retrievecourse'));
+		$mform->addElement('html',get_string('fin_graphique_div','report_retrievecourse'));
+		$mform->closeHeaderBefore('end');
+		
+		$graphDB = new ManageGraphiqueDB();
+		$graph = new Graphique();
+		$arrayAdmin = array(
+				'admin backup'=> $graphDB->getNbAdminBackupImmediat(),
+				'admin cron' => $graphDB->getNbAdminBackupCron()	
+		);
+		
+		$arrayProf = array(
+				'new course'=>$graphDB->getNbTeacherChoiceNewCourse(),
+				'backup ' => $graphDB->getNbTeacherChoiceBackup()
+		);
+		
+		$arrayUsedPlugin = array(
+				'Courses that used the plugin' => $graphDB->getNbCourUsedPlugin(),
+				'Courses that don\'t use the plugin' => $graphDB->getNbCourNotUsedPlugin()
+		);
+		$graph->genererGraphique($arrayAdmin, 'graphique_admin', 'Fait par admin');
+		$graph->genererGraphique($arrayProf, 'graphique_prof', 'Fait par prof');
+		$graph->genererGraphique($arrayUsedPlugin, 'graphique_usingPlugin', 'Utilisation du plugin');
+		
+	}
+	
 	
 	public function getListeCour(){
 		return $this->listeCour;

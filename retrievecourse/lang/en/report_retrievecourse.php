@@ -1,6 +1,12 @@
 <?php
 
 $string['pluginname'] = 'Retrieve Course';
+$string['retrievecourse_config'] = 'Retrieve Course Settings';
+$string['retrievecourse_description'] = '';
+$string['tempYearOne'] = utf8_encode('Nombre de chiffre dans la premiére année.');
+$string['tempYearTwo'] = utf8_encode('Nombre de chiffre dans la deuxiéme année.');
+$string['nbTentativeMax'] = utf8_encode('Nombre de tentative de backup/restore');
+$string['adminUser'] = 'Id de l\' administrateur';
 
 //FormTeacher
 $string['warning'] = 'Attention';
@@ -17,8 +23,12 @@ $string['listeCour'] = 'Liste des cours: ';
 $string['use_cron'] = utf8_encode('Utiliser cron: ');
 $string['checkbox_usecron'] = utf8_encode('Utiliser cron: ');
 $string['checkbox_backupImmediately'] = utf8_encode('Démarrer le backup/restore immédiatement');
-
-
+$string['header_statistique'] = 'Statistique';
+$string['debut_graphique_div'] = "<div style='display: inline-block;' id='graphique'>  ";
+$string['fin_graphique_div'] = "</div>";
+$string['graphique_admin'] = "<div style='width: 300px; ' id='graphique_admin'></div>";
+$string['graphique_prof'] = "<div style='width: 300px;' id='graphique_prof'></div>";
+$string['graphique_usingPlugin'] = "<div style='width: 300px;' id='graphique_usingPlugin'></div>";
 
 //FormTrie
 $string['trie'] = 'Trie ';

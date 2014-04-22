@@ -10,6 +10,7 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
 require_once($CFG->dirroot . '/backup/moodle2/backup_plan_builder.class.php');
 require_once($CFG->dirroot . '/backup/util/ui/import_extensions.php');
 require_once '/../model/ManageDB.php';
+require_once '/../model/RetrieveCourseConstante.php';
 
 /**
  * RetrieveCursusService va permettre de faire le backup et le restore. 
@@ -25,7 +26,7 @@ class RetrieveCourseService {
 	
 	/**
 	 * Id de l'user courant.
-	 * @var string $user.
+	 * @var int $user.
 	 */
 	private $user;
 	/**
@@ -41,10 +42,17 @@ class RetrieveCourseService {
 	private $nextShortname;
 	
 	/**
+	 * Permettra de savoir si le backup est immédiat ou s'il est fait à l'aide de cron.
+	 * @var int
+	 */
+	private $flagcron ;
+	/**
 	 * 
 	 * @var ManageDB
 	 */
 	private $db;
+	
+
 	
 	public $currentProgress = 0;
 	public $step = 1;
@@ -58,12 +66,16 @@ class RetrieveCourseService {
 	 * @param string $nextShortname
 	 *  Shortname du cour vers où se fera le restore.
 	 */
-	function __construct($course , $user , $nextShortname){
+	function __construct($course , $user , $nextShortname , $flagcron = RetrieveCourseConstante::USE_BACKUP_IMMEDIATELLY){
 		$this->db = new ManageDB();
-		$this->user = $user;
+		
+		$this->setUserId($user);
+		
 		$this->setCourse($course);
 		
 		$this->folder = NULL;
+		
+		$this->flagcron = $flagcron;
 	
 		$this->setNextShortName($nextShortname);
 	}
@@ -72,22 +84,24 @@ class RetrieveCourseService {
 	 * Permet de lancer le backup du cour courant et le restore vers le cour de l'année suivante.
 	 */
 	public function runService(){
-		global $PAGE;
-		if($this->course != NULL && $this->nextShortname != NULL ){
+		if($this->course != NULL && $this->nextShortname != NULL && $this->user != NULL){
 			$this->backup();
 			$this->restore();
 		}else{
 			echo utf8_encode("Erreur!!!
-					Veuillez vérifier que le cours et le shortname entrer soit bien dans la base de donné");
+					Veuillez vérifier que le cours, le shortname, userid entrer soit bien dans la base de donné");
 		}
 	
 	}
 	
 	private function backup(){
-		global $CFG,$PAGE;
-		echo "<script>";
-		echo "document.getElementById('progress_bar_course').innerHTML='Backup du cour : ".$this->db->getShortnameCourse($this->course)."';";
-		echo "</script>";
+		global $CFG;
+		if($this->flagcron == RetrieveCourseConstante::USE_BACKUP_IMMEDIATELLY){
+			echo "<script>";
+			echo "document.getElementById('progress_bar_course').innerHTML='Backup du cour : ".$this->db->getShortnameCourse($this->course)."';";
+			echo "</script>";
+		}
+		
 		$bc = new backup_controller(backup::TYPE_1COURSE, $this->course, backup::FORMAT_MOODLE,
 				backup::INTERACTIVE_YES, backup::MODE_GENERAL, $this->user);
 		
@@ -96,7 +110,7 @@ class RetrieveCourseService {
 		$backup->process();
 		
 		$logger = new WebCTServiceLogger($CFG->debugdeveloper ? backup::LOG_DEBUG : backup::LOG_INFO);
-	    $progress = new WebCTServiceProgress($logger,$this->currentProgress,$this->step);
+	    $progress = new WebCTServiceProgress($logger,$this->flagcron,$this->currentProgress,$this->step);
 	    $progress->start_progress('', 1);
 		$backup->get_controller()->set_progress($progress);
 		$backup->get_controller()->add_logger($logger);
@@ -111,9 +125,12 @@ class RetrieveCourseService {
 	private function restore(){
 		global $DB,$CFG,$USER;
 		if($this->folder != NULL){
-			echo "<script>";
-			echo "document.getElementById('progress_bar_course').innerHTML='Restauration vers le cour : ".$this->nextShortname."';";
-			echo "</script>";
+			if($this->flagcron == RetrieveCourseConstante::USE_BACKUP_IMMEDIATELLY){
+				echo "<script>";
+				echo "document.getElementById('progress_bar_course').innerHTML='Restauration vers le cour : ".$this->nextShortname."';";
+				echo "</script>";
+			}
+			
 			$courseId = $this->db->retieveCourseId($this->nextShortname);
 			if($courseId != NULL){
 				$transaction = $DB->start_delegated_transaction();
@@ -126,7 +143,7 @@ class RetrieveCourseService {
 				$transaction = $DB->start_delegated_transaction();
 				
 				$logger = new WebCTServiceLogger($CFG->debugdeveloper ? backup::LOG_DEBUG : backup::LOG_INFO);
-				$progress = new WebCTServiceProgress($logger, $this->currentProgress, $this->step);
+				$progress = new WebCTServiceProgress($logger, $this->flagcron ,$this->currentProgress, $this->step);
 				
 				
 				$controller = new restore_controller($this->folder, $courseId,
@@ -147,17 +164,16 @@ class RetrieveCourseService {
 	}
 	
 	public function setCourse($idCourse){
-		if($idCourse != NULL && $this->db->checkIdCourseExist($idCourse)){
-			$this->course = $idCourse;
-		}
+		$this->course = ($idCourse != NULL && $this->db->checkIdCourseExist($idCourse)) ? $idCourse : NULL;
 	}
 	
 	public function setNextShortName($nextShortname){
-		if($nextShortname != NULL && $this->db->checkCourseExist($nextShortname)){
-			$this->nextShortname = $nextShortname;
-		}
+		$this->nextShortname = ($nextShortname != NULL && $this->db->checkCourseExist($nextShortname)) ? $nextShortname : NULL;
 	}
 	
+	public function setUserId($userid){
+		$this->user = ($userid != NULL && $this->db->checkUserExist($userid)) ? $userid : NULL;
+	}
 	
 	
 }
@@ -176,7 +192,7 @@ class WebCTServiceLogger extends base_logger {
 }
 
 class WebCTServiceProgress extends core_backup_progress {
-
+	
 	/**
 	 * @var WebCTServiceLogger
 	 */
@@ -186,13 +202,27 @@ class WebCTServiceProgress extends core_backup_progress {
 	protected $step;
 	
 	private $progress;
+	/**
+	 * 
+	 * @var ManageDb
+	 */
+	private $db;
+	/**
+	 * Permettra de savoir si le backup est immédiat ou s'il est fait à l'aide de cron.
+	 * @var int
+	 */
+	private $flagcron;
 
-	public function __construct($logger,$currentProgress=0, $step=1) {
+	public function __construct($logger,$flagcron ,$currentProgress=0, $step=1) {
 		$this->logger=$logger;
 
 		$this->currentProgress=$currentProgress;
 		
 		$this->step = $step;
+		
+		$this->db = new ManageDB();
+		
+		$this->flagcron = $flagcron;
 	}
 	
 	public function getProgress(){
@@ -204,18 +234,28 @@ class WebCTServiceProgress extends core_backup_progress {
 		
 		if($this->is_in_progress_section()){
 			$range = $this->get_progress_proportion_range();
-			//			$this->logger->process($this->get_current_description().' ==> '.$range[0].'-'.$range[1], backup::LOG_DEBUG);
-			//$this->logger->process(var_dump(), backup::LOG_DEBUG);
-				
+		
+			if($this->flagcron == RetrieveCourseConstante::USE_CRON){
+				$idCron = $this->db->getIdCronRunning();
+				//idCron vaut NULL dans le cas où aucun cours n'est en cours de backup/restore avec cron.
+				if($idCron != NULL){
+					$this->db->updateTimeModifiedCron( $idCron , time());
+				}
+			}
+			
+			
 			$this->progress = $this->currentProgress + $range[1]*100*$this->step;
-				
-			echo "<script>";
-			echo "document.getElementById('pourcentage').innerHTML='".$this->progress."%';";
-			echo "document.getElementById('barre').style.width='".$this->progress."%';";
-			echo "document.getElementById('progress_bar_description').innerHTML='".$this->get_current_description()."';";
-			echo "</script>";
-			//ob_flush();
-			flush();
+			
+			if($this->flagcron == RetrieveCourseConstante::USE_BACKUP_IMMEDIATELLY){
+				echo "<script>";
+				echo "document.getElementById('pourcentage').innerHTML='".$this->progress."%';";
+				echo "document.getElementById('barre').style.width='".$this->progress."%';";
+				echo "document.getElementById('progress_bar_description').innerHTML='".$this->get_current_description()."';";
+				echo "</script>";
+				//ob_flush();
+				flush();
+			}
+			
 		}
 	}
 }

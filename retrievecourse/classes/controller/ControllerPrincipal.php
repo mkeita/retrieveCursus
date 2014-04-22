@@ -5,6 +5,7 @@ require_once 'ControllerFormTeacher.php';
 require_once 'ControllerFormAdmin.php';
 require_once '/../model/ManageDB.php';
 require_once '/../view/FormAdmin.php';
+require_once '/../../outils.php';
 /**
  * 
  * @author Ilias
@@ -48,7 +49,6 @@ class ControllerPrincipal {
 	private function adminDisplay(){
 		$formAdmin = new FormAdmin();
 		$controllerFormAdmin = new ControllerFormAdmin($formAdmin);
-		
 		($formAdmin->is_submitted()) ? $controllerFormAdmin->admin_submit() :$formAdmin->display();
 		
 	}
@@ -58,32 +58,16 @@ class ControllerPrincipal {
 		global $PAGE;
 		$formTeacher = new FormTeacher();
 		$controllerFormTeacher = new ControlleurFormTeacher($formTeacher);
-		($formTeacher->is_submitted()) ? $controllerFormTeacher->teacher_submit($this->nextShortname($PAGE->course->shortname))
+		($formTeacher->is_submitted()) ? $controllerFormTeacher->teacher_submit(nextShortname($PAGE->course->shortname))
 										:$formTeacher->display();
 	}
 	
-	/**
-	 * Cette fonction permet de crée le shortname de l'année académique suiavnate.
-	 * Cette fonction part du principe que les derniers caractéres représentent l' année académique.
-	 * @param string $course
-	 * @return Le shortname du cour pour l'année académique suivante.
-	 */
-	private function nextShortname($course ,$tailleTemp = 6, $tailleYearOne = 4,$tailleYearTwo = 2){
-		$temp = substr($course, -$tailleTemp);
-		$yearOne = substr($temp, 0 , $tailleYearOne);
-		$yearTwo = substr($temp,-$tailleYearTwo);
-		$yearOne += 1;
-		$yearTwo = ($yearTwo +1) % 100 ;
-		$mnemo = substr($course, 0 , strlen($course)- $tailleTemp)	;
-		$newShortname = $mnemo . $yearOne . $yearTwo ;
-		return $newShortname;
-	}
 	/**
 	 * Permet de vérifier si le cour de l'année prochaine a bien été crée.
 	 */
 	private function verifierCreationCour(){
 		global $PAGE;
-		$nextShortname = $this->nextShortname($PAGE->course->shortname);
+		$nextShortname = nextShortname($PAGE->course->shortname);
 		if(!$this->db->checkCourseExist($nextShortname)){
 			?> <script type="text/javascript" charset="utf-8" >
 					alert("Le cour de l'ann\351e prochaine n'a pas encore \351t\351 cr\351e");
@@ -114,7 +98,7 @@ class ControllerPrincipal {
 	 */
 	private function checkTeacherOfNextCourse(){
 		global $PAGE,$DB,$USER;
-		$idCourseNextYear = $this->db->getCourseId($this->nextShortname($PAGE->course->shortname));
+		$idCourseNextYear = $this->db->getCourseId(nextShortname($PAGE->course->shortname));
 		$ok = (($idCourseNextYear != NULL) && ($this->db->checkUserEnroledInCourse($idCourseNextYear ,$USER->id)));
 		if(!$ok){
 			?> <script type="text/javascript" charset="utf-8" >
