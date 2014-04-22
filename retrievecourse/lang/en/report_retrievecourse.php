@@ -24,11 +24,11 @@ $string['use_cron'] = utf8_encode('Utiliser cron: ');
 $string['checkbox_usecron'] = utf8_encode('Utiliser cron: ');
 $string['checkbox_backupImmediately'] = utf8_encode('Démarrer le backup/restore immédiatement');
 $string['header_statistique'] = 'Statistique';
-$string['debut_graphique_div'] = "<div style='display: inline-block;' id='graphique'>  ";
+$string['debut_graphique_div'] = "<div style='width='100%'' id='graphique'>  ";
 $string['fin_graphique_div'] = "</div>";
-$string['graphique_admin'] = "<div style='width: 300px; ' id='graphique_admin'></div>";
-$string['graphique_prof'] = "<div style='width: 300px;' id='graphique_prof'></div>";
-$string['graphique_usingPlugin'] = "<div style='width: 300px;' id='graphique_usingPlugin'></div>";
+$string['graphique_admin'] = "<div style='display: inline-block; text-align:left; width: 32%; ' id='graphique_admin'></div>";
+$string['graphique_prof'] = "<div style='display: inline-block; text-align:left; width: 32%;' id='graphique_prof'></div>";
+$string['graphique_usingPlugin'] = "<div style='display: inline-block; text-align:left; width: 32%;' id='graphique_usingPlugin'></div>";
 
 //FormTrie
 $string['trie'] = 'Trie ';

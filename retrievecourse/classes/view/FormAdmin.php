@@ -58,9 +58,10 @@ class FormAdmin extends moodleform{
 	private function creationGraphique($mform){
 		$mform->addElement('header', 'header_statistique', get_string('header_statistique','report_retrievecourse'));
 		$mform->addElement('html',get_string('debut_graphique_div','report_retrievecourse'));
+		$mform->addElement('html',get_string('graphique_usingPlugin','report_retrievecourse'));
 		$mform->addElement('html',get_string('graphique_admin','report_retrievecourse'));
 		$mform->addElement('html',get_string('graphique_prof','report_retrievecourse'));
-		$mform->addElement('html',get_string('graphique_usingPlugin','report_retrievecourse'));
+		
 		$mform->addElement('html',get_string('fin_graphique_div','report_retrievecourse'));
 		$mform->closeHeaderBefore('end');
 		
@@ -77,8 +78,8 @@ class FormAdmin extends moodleform{
 		);
 		
 		$arrayUsedPlugin = array(
-				'Courses that used the plugin' => $graphDB->getNbCourUsedPlugin(),
-				'Courses that don\'t use the plugin' => $graphDB->getNbCourNotUsedPlugin()
+				'Courses that used </br>the plugin' => $graphDB->getNbCourUsedPlugin(),
+				'Courses that doesn\'t </br>use the plugin' => $graphDB->getNbCourNotUsedPlugin()
 		);
 		$graph->genererGraphique($arrayAdmin, 'graphique_admin', 'Fait par admin');
 		$graph->genererGraphique($arrayProf, 'graphique_prof', 'Fait par prof');
