@@ -34,10 +34,14 @@ defined('MOODLE_INTERNAL') || die;
  * @param stdClass $context The context of the course
  */
 function report_retrievecourse_extend_navigation_course($navigation, $course, $context) {
-    if (has_capability('report/retrievecourse:view', $context)) {
-        $url = new moodle_url('/report/retrievecourse/index.php', array('id'=>$course->id));
-        $navigation->add(get_string('pluginname', 'report_retrievecourse'), $url, navigation_node::TYPE_SETTING, null, null, new pix_icon('i/report', ''));
-    }
+	global $CFG,$PAGE;
+	$tempCourse = substr($PAGE->course->shortname,-( $CFG->tempYearOne + $CFG->tempYearTwo));
+	if($CFG->visibilite_plugin && $tempCourse == $CFG->temp){
+		if (has_capability('report/retrievecourse:view', $context)) {
+			$url = new moodle_url('/report/retrievecourse/index.php', array('id'=>$course->id));
+			$navigation->add($CFG->namePlugin, $url, navigation_node::TYPE_SETTING, null, null, new pix_icon('i/report', ''));
+		}
+	}
 }
 
 

@@ -4,7 +4,10 @@ defined('MOODLE_INTERNAL') || die;
 
 
 
-
+function getNamePlugin(){
+	global $CFG;
+	return 'Copie '. (substr($CFG->temp,0,$CFG->tempYearOne)+1) .'-'. (substr($CFG->temp,-$CFG->tempYearTwo)+1) .' du cour';
+}
 
 /**
  * Cette fonction permet de crée le shortname de l'année académique suivante.

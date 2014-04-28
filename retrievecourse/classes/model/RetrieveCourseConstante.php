@@ -1,6 +1,8 @@
 <?php
 
 class RetrieveCourseConstante {
+	
+	
 	//Confirmation
 	const CONFIRMATION_BACKUP_IMMEDIAT= 10;
 	const CONFIRMATION_USE_CRON = 20;

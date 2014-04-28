@@ -1,6 +1,5 @@
 <?php
 
-
 require_once '/../view/FormAdmin.php';
 require_once '/../service/RetrieveCourseService.php';
 require_once '/../model/RetrieveCourseConstante.php';
@@ -18,26 +17,29 @@ class ControllerFormAdmin {
 	 */
 	private $formAdmin;
 	private $db; 
+	
 	function __construct($formAdmin){
 		$this->formAdmin = $formAdmin;
 		$this->db = new ManageDB();
 	}
 	
-	
 	function admin_submit(){
 		global $PAGE;
-		if(!$this->formAdmin->is_cancelled()){
-			$infoForm = $this->formAdmin->get_data();
+		
+		if ($this->formAdmin->is_cancelled()){
+			redirect("../..");
+		}elseif ($this->formAdmin->no_submit_button_pressed()) {
+			//Rentrera ici lorsque l'utilisateur appuiera sur le bouton "trie" .
+			$this->formAdmin->envoiInfoTrie();
+		}elseif ($this->formAdmin->is_submitted()){
+			$infoForm=$this->formAdmin->get_submitted_data();
 			$message_cron =utf8_encode('Êtes-vous sûr de vouloir faire un backup/restore via cron?');
 			$message_backup = utf8_encode('Êtes-vous sûr de vouloir faire un backup/restore immédiatement?');
 			if($infoForm->choice_type_backup)
 				$this->confirmation($message_backup, RetrieveCourseConstante::CONFIRMATION_BACKUP_IMMEDIAT,$infoForm->cours) ;
 			else
-				$this->confirmation($message_cron, RetrieveCourseConstante::CONFIRMATION_USE_CRON,$infoForm->cours) ;
-		}else{
-			redirect("../..");
-		}	
-		
+				$this->confirmation($message_cron, RetrieveCourseConstante::CONFIRMATION_USE_CRON,$infoForm->cours) ;	
+		} 
 	}
 	
 	private function confirmation($message , $type_confirmation , $cours){
@@ -49,12 +51,8 @@ class ControllerFormAdmin {
 			//cours séléctionné.
 			$cours = array_keys($this->formAdmin->getListeCour());
 		}
-		$json = json_encode($cours);
 		echo $OUTPUT->confirm($message, '/report/retrievecourse/index.php?confirmation='. $type_confirmation .
-				'&cour='.$json , '/report/retrievecourse/index.php');
-		
+				'&cour='.json_encode($cours) , '/report/retrievecourse/index.php');
 	}
-	
-	
 	
 }

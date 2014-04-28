@@ -5,6 +5,25 @@
  */
 class ManageDB {
 	
+	public function retrievecourse_cron(){
+		global $DB;
+		$result = $DB->get_records('retrievecourse_cron');
+		return $result;
+	}
+	
+	public function retrieveNameColumn(){
+		global $DB;
+		$result = $this->retrievecourse_cron();
+		$columnName = array();
+		foreach ($result as $object){
+			foreach ($object as $key=>$value){
+				$columnName[] = $key;
+			}
+			break;
+		}
+		return $columnName;
+	}
+	
 	/**
 	 * Cette méthode permet de vérifier qu'un cours existe à partir de son shortname.
 	 * @param string $course Le shortname du cours dont on veut vérifier l'existence.
@@ -231,7 +250,6 @@ class ManageDB {
 		$tempSize = $CFG->tempYearOne + $CFG->tempYearTwo;
 		$result = $DB->get_records_sql('SELECT COUNT(*) FROM mdl_course
 				WHERE SUBSTR(shortname, -'. $tempSize.') = '. $CFG->temp);
-		var_dump($result);
 		return $result;
 	}
 	
@@ -242,17 +260,18 @@ class ManageDB {
 	 * @param string $mot
 	 */
 	public function searchCourseNotUsedPlugin($search){
-		global $DB;
+		global $DB,$CFG;
 		$listeCours = array('-1'=>'All			');
+		$param = array('search'=> $search);
 		$result = $DB->get_records_sql('SELECT mdl_course.id,mdl_course.shortname FROM mdl_course
 				WHERE mdl_course.id NOT IN (SELECT mdl_retrievecourse.courseid_old FROM mdl_retrievecourse)
-				   and mdl_course.shortname LIKE \'%' . $search . '%\'');
-		
+				   and mdl_course.shortname LIKE "% :search %" ' , $param);
 		foreach ($result as $value){
 			//TODO Temp config
-			$temp = substr($value->shortname, -6);
+			$tempSize = $CFG->tempYearOne + $CFG->tempYearTwo;
+			$temp = substr($value->shortname, -$tempSize);
 			//TODO Recuperer des config '201314'
-			if($temp == '201314'){
+			if($temp == $CFG->temp){
 				$listeCours[$value->id] = $value->shortname;
 			}
 		}

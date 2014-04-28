@@ -8,6 +8,7 @@ $string['tempYearTwo'] = utf8_encode('Nombre de chiffre dans la deuxiéme année.'
 $string['nbTentativeMax'] = utf8_encode('Nombre de tentative de backup/restore');
 $string['adminUser'] = 'Id de l\' administrateur';
 
+
 //FormTeacher
 $string['warning'] = 'Attention';
 $string['messageTeacher'] = '<p> <font color="#FF0000"> '.

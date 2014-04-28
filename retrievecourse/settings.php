@@ -30,14 +30,27 @@ defined('MOODLE_INTERNAL') || die;
 
 $ADMIN->add('reports', new admin_category('retrieveCourse', 'Retrieve Course'));
 
-$ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecourse', get_string('pluginname', 'report_retrievecourse'), "$CFG->wwwroot/report/retrievecourse/index.php", 'report/log:view'));
+
+$ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecourse', $CFG->namePlugin , "$CFG->wwwroot/report/retrievecourse/index.php", 'report/log:view'));
+
+$ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecoursecron', 'viewCron', "$CFG->wwwroot/report/retrievecourse/viewCronTasks.php", 'report/log:view'));
 
 $settings = null;
+
 
 // Create a page for automated backups configuration and defaults.
 $temp = new admin_settingpage('retrievecourse_settings', get_string('retrievecourse_config','report_retrievecourse'));
 
 $temp->add( new admin_setting_configcheckbox('visibilite_plugin', 'visibilite_plugin', '', 1));
+
+$namePlugin = 'Copie '. (substr($CFG->temp,0,$CFG->tempYearOne)+1) .'-'. (substr($CFG->temp,-$CFG->tempYearTwo)+1) .' du cours';
+$CFG->namePlugin = $namePlugin;
+
+// $CFG->tempSize = $CFG->tempYearOne + $CFG->tempYearTwo;
+// var_dump($CFG->tempSize);
+
+// $temp->add(new admin_setting_configtext('namePlugin', 'Nom du plugin',
+// 		get_string('retrievecourse_description', 'report_retrievecourse'), $namePlugin, PARAM_TEXT));
 
 $temp->add(new admin_setting_configtext('tempYearOne', get_string('tempYearOne', 'report_retrievecourse'),
 		get_string('retrievecourse_description', 'report_retrievecourse'), 4, PARAM_INT));
@@ -71,3 +84,4 @@ $temp->add(new admin_setting_configtext('idAdminUser', get_string('adminUser', '
 		get_string('retrievecourse_description', 'report_retrievecourse'), 2, PARAM_INT));
 
 $ADMIN->add('retrieveCourse', $temp);
+

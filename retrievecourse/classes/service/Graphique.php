@@ -8,9 +8,7 @@ class Graphique{
 	 */
 	private $db;
 	
-	function construct(){
-		
-		
+	function construct(){	
 		$this->db = new ManageDB();
 	}
 	/**
@@ -24,6 +22,7 @@ class Graphique{
 	 */
 	public function genererGraphique($data,$divId,$title){
 		?>
+		
 		<script type="text/javascript" src="/report/retrievecourse/lib/jqplot/dist/jquery.jqplot.min.js"></script>
 		<link rel='stylesheet' type="text/css" href="/report/retrievecourse/lib/jqplot/dist/jquery.jqplot.min.css"/>
 		<script type="text/javascript" src="/report/retrievecourse/lib/jqplot/dist/plugins/jqplot.pieRenderer.min.js"></script>
@@ -40,15 +39,12 @@ class Graphique{
 		 
 		
 		$(document).ready(function(){
-			  var plot1 = jQuery.jqplot ('<?php echo $divId; ?>', [<?php echo $divId; ?>], 
+			    var plot1 = jQuery.jqplot ('<?php echo $divId; ?>', [<?php echo $divId; ?>], 
 			    { 
 				  title:'<?php echo $title; ?>',  
 			      seriesDefaults: {
-			        // Make this a pie chart.
 			        renderer: jQuery.jqplot.PieRenderer, 
 			        rendererOptions: {
-			          // Put data labels on the pie slices.
-			          // By default, labels show the percentage of the slice.
 			          showDataLabels: true
 			        }
 			      }, 
@@ -61,12 +57,5 @@ class Graphique{
 		
 	}
 	
-	private function convertArrayPhpToJs($data){
-		$ind = 0;
-		echo '<script> var  dataArrayPieChart; </script>';
-		foreach ($data as $name => $pourcent) {
-			echo   '<script>  dataArrayPieChart['.$ind .'] = ['. json_encode($name) . ', ' . $pourcent . ']; </script>' ;
-			$ind += 1;
-		}		
-	}
+
 }
