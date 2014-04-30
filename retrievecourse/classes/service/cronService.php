@@ -5,7 +5,8 @@ defined('MOODLE_INTERNAL') || die;
 require_once '/../model/ManageDB.php';
 require_once 'RetrieveCourseService.php';
 require_once '/../model/RetrieveCourseConstante.php';
-
+require_once ($CFG->libdir.'/messagelib.php');
+require_once ($CFG->libdir.'/datalib.php');
 
 class cronService {
 	
@@ -27,20 +28,50 @@ class cronService {
 	
 	public function launchBackupRestore(){
 		$listeCron = $this->db->retrieveCron();
-		var_dump($listeCron);
 		foreach($listeCron as $cron){
 			if(!$this->verifierPlageHoraire()){
 				break;
 			}
 			if($this->db->getFlagStatus($cron->id) != RetrieveCourseConstante::STATUS_ERROR){
 				$this->initialiserService($cron->courseid, $cron->user , $cron->shortname_course_new );
-				$this->db->updateFlagStatus($cron->id , RetrieveCourseConstante::CRON_EXECUTE);
+				$this->db->updateFlagStatus($cron->id , RetrieveCourseConstante::STATUS_EXECUTE);
 				$this->db->updateTimeStart($cron->id, time());
 				$this->service->runService();
 				$this->db->deleteCron($cron->id);
 				$this->db->cronFinish($cron->id, $cron->courseid);
+				$this->send_email($cron->user , $cron->shortname_course_new  );
 			}
 		} 
+	}
+	
+	
+
+	private function send_email($userid , $shortname){
+		global $DB;
+	
+		$message = 'Bonjour, </br> </br>';
+		$message .= $shortname . ' disponible';
+	
+		$userto = $DB->get_record('user', array("id"=>$userid));
+	
+		$admin = get_admin();
+		$admin->priority = 1;
+	
+		//Send the message
+		$eventdata = new stdClass();
+		$eventdata->modulename        = 'moodle';
+		$eventdata->userfrom          = $admin;
+		$eventdata->userto            = $userto;
+		$eventdata->subject           = utf8_encode('Récupération des informations dans le cours ' . $shortname);
+		$eventdata->fullmessage       = $message;
+		$eventdata->fullmessageformat = FORMAT_PLAIN;
+		$eventdata->fullmessagehtml   = '';
+		$eventdata->smallmessage      = '';
+		$eventdata->component         = 'moodle';
+		$eventdata->name         = 'backup';
+		$eventdata->notification = 1;
+		message_send($eventdata);
+	
 	}
 	
 	private function initialiserService( $idCourse , $userid , $nextShortname){

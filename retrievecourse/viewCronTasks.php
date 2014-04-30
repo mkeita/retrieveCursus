@@ -4,6 +4,7 @@ require('../../config.php');
 require_once($CFG->dirroot.'/course/lib.php');
 require_once ($CFG->libdir.'/accesslib.php');
 require_once 'classes/model/ManageDB.php';
+require_once 'classes/model/RetrieveCourseConstante.php';
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -23,7 +24,6 @@ if($data == NULL){
 	echo 'Aucun cours n\'est en attente'; 
 }else{
 	echo '<table id="tableCron">';
-	echo '<caption> Cron Logs </caption>';
 	echo '<thead>';
 	echo '<tr>';
 		foreach ($nameColumn as $key=>$name){
@@ -34,8 +34,8 @@ if($data == NULL){
 	foreach ($data as $object){
 		echo '<tr>';
 		foreach ($object as $key => $value){
-			if(strcasecmp($key, "time_created") == 0){
-				echo '<td> ' . date("d/m/y H:i:s",$value) . '</td>';
+			if(strcmp($key, "time_created") == 0 || strcmp($key, "time_start") == 0 || strcmp($key, "time_modified") == 0){
+				echo ($value == NULL) ? '<td> ' . $value . '</td>' : '<td> ' . date("d/m/y H:i:s",$value) . '</td>';
 			}else{
 				echo '<td> ' . $value . '</td>';
 			}

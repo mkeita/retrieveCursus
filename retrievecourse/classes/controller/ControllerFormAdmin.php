@@ -3,7 +3,8 @@
 require_once '/../view/FormAdmin.php';
 require_once '/../service/RetrieveCourseService.php';
 require_once '/../model/RetrieveCourseConstante.php';
-
+require_once '/../../outils.php';
+require_once '/../service/RetrieveCourseService.php';
 
 /**
  * 
@@ -17,10 +18,13 @@ class ControllerFormAdmin {
 	 */
 	private $formAdmin;
 	private $db; 
+	private $service;
 	
 	function __construct($formAdmin){
+		global $USER;
 		$this->formAdmin = $formAdmin;
 		$this->db = new ManageDB();
+		$this->service = new RetrieveCourseService(null, $USER->id, null);
 	}
 	
 	function admin_submit(){
@@ -54,5 +58,68 @@ class ControllerFormAdmin {
 		echo $OUTPUT->confirm($message, '/report/retrievecourse/index.php?confirmation='. $type_confirmation .
 				'&cour='.json_encode($cours) , '/report/retrievecourse/index.php');
 	}
+	
+	/**
+	 * Permet de lancer le backup/restore pour une liste de cour.
+	 * Permet également d'initialiser la barre de progression.
+	 * @param json $courJson
+	 * Liste des cours dont il faut faire le backup.
+	 */
+	public function backup_immediat($courJson){
+		global $USER,$PAGE,$CFG;
+		if(isset($courJson)){
+			echo '<div id="conteneur" style="display:block; background-color:transparent; width:80%; border:1px solid #000000;">
+					<div id="barre" style="display:block; background-color:rgba(132, 232, 104, 0.7); width:0%; height:100%;float:top;clear : top ;clear:both">
+						<div id="pourcentage" style="text-align:right; height:100%; font-size:1.8em;">
+							&nbsp;
+						</div>
+					</div>
+				</div>
+				<label id="progress_bar_description"></label></br>
+				<label id="progress_bar_course"></label>';
+	
+			$cour = json_decode($courJson);
+			$indice = 0;
+			$nbElemRestore = count($cour) ;
+			$this->service->step =1/(count($nbElemRestore)*2);
+			foreach ($cour as $idCourse){
+				$shortname =  $this->db->getShortnameCourse($idCourse);
+				$nextShortname = nextShortname($shortname);
+				progression($indice);
+				$this->service->currentProgress = $indice;
+				if($shortname != NULL){
+					$this->service->setCourse($idCourse);
+					$this->service->setNextShortName($nextShortname);
+					$this->service->runService($nbElemRestore);
+					$this->db->addCourse_retrievecourse($shortname , $nextShortname , $CFG->temp , $idCourse);
+				}
+				$indice += 100 /(count($nbElemRestore)*2 );
+			}
+		}
+	}
+	
+	/**
+	 * Permet de stocher une liste de cour dans la table "retrievecourse_cron". Le backup sera fait ultérieurement.
+	 * @param json $courJson
+	 * Liste des cours dont il faut faire le backup.
+	 */
+	public function admin_use_cron($courJson){
+		global $CFG,$USER;
+		if(isset($courJson)){
+			$cour = json_decode($courJson);
+			foreach ($cour as $idCourse){
+				$shortname =  $this->db->getShortnameCourse($idCourse);
+				if($shortname != NULL){
+					$nextShortname = nextShortname($shortname);
+					if(!$this->db->checkPluginUsed($idCourse)){
+						$this->db->addCourse_cron($idCourse, $USER->id , $nextShortname);
+						$this->db->addCourse_retrievecourse($shortname , $nextShortname , $CFG->temp , $idCourse ,false , true );
+					}
+					
+				}
+			}
+		}
+	}
+	
 	
 }

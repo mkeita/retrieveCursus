@@ -36,7 +36,6 @@ class FormAdmin extends moodleform{
 
 	private function creationListeCour($mform){
 		$this->initialiserListeCour();
-		//TODO Faire les verification de départ pour chacun des éléments avant de les placer dans le select.
 		$mform->addElement('header', 'header_admin', get_string('header_admin','report_retrievecourse'));
 		
 		$mform->addElement('select', 'cours', get_string('listeCour', 'report_retrievecourse'), $this->listeCour);
@@ -98,15 +97,21 @@ class FormAdmin extends moodleform{
 		
 		$arrayProf = array(
 				'new course'=>$graphDB->getNbTeacherChoiceNewCourse(),
-				'backup ' => $graphDB->getNbTeacherChoiceBackup()
+				'backup' => $graphDB->getNbTeacherChoiceBackup()
 		);
 		
 		$arrayUsedPlugin = array(
 				'Courses that used </br>the plugin' => $graphDB->getNbCourUsedPlugin(),
 				'Courses that doesn\'t </br>use the plugin' => $graphDB->getNbCourNotUsedPlugin()
 		);
-		$graph->genererGraphique($arrayAdmin, 'graphique_admin', 'Fait par admin');
-		$graph->genererGraphique($arrayProf, 'graphique_prof', 'Fait par prof');
+		
+		if($arrayAdmin['admin backup'] != 0   || $arrayAdmin['admin cron'] != 0  ){
+			$graph->genererGraphique($arrayAdmin, 'graphique_admin', 'Fait par admin');
+		}
+		if($arrayProf['new course'] != 0   || $arrayProf['backup'] != 0  ){
+			$graph->genererGraphique($arrayProf, 'graphique_prof', 'Fait par prof');
+		}
+		
 		$graph->genererGraphique($arrayUsedPlugin, 'graphique_usingPlugin', 'Utilisation du plugin');
 		
 	}

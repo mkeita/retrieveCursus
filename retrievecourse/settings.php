@@ -33,7 +33,7 @@ $ADMIN->add('reports', new admin_category('retrieveCourse', 'Retrieve Course'));
 
 $ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecourse', $CFG->namePlugin , "$CFG->wwwroot/report/retrievecourse/index.php", 'report/log:view'));
 
-$ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecoursecron', 'viewCron', "$CFG->wwwroot/report/retrievecourse/viewCronTasks.php", 'report/log:view'));
+$ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecoursecron', 'Cron Logs', "$CFG->wwwroot/report/retrievecourse/viewCronTasks.php", 'report/log:view'));
 
 $settings = null;
 

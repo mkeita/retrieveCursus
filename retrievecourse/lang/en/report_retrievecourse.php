@@ -42,3 +42,8 @@ $string['element_recherche'] = utf8_encode('<b> Shortname ou partie du shortname
 $string['header_confirm'] = 'Confirmation';
 $string['confirm_yes'] = 'oui';
 $string['confirm_no'] = 'non';
+
+//Email
+
+$string['messageprovider:confirmation'] = 'Confirmation of your own quiz submissions';
+$string['messageprovider:submission'] = 'Notification of quiz submissions';

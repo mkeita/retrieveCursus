@@ -55,7 +55,7 @@ class ManageDB {
 	 */
 	public function addCourse_cron($idCourse, $userid , $nextShortname){
 		global $DB;
-		$dataobject = array('courseid'=>$idCourse , 'user'=>$userid , 'shortname_course_new'=>$nextShortname , 'status'=>0,
+		$dataobject = array('courseid'=>$idCourse , 'user'=>$userid , 'shortname_course_new'=>$nextShortname , 'status'=>RetrieveCourseConstante::STATUS_WAITING,
 				 'time_created'=> time() , 'tentative' => 0);
 		$DB->insert_record('retrievecourse_cron', $dataobject);
 	}
@@ -253,8 +253,6 @@ class ManageDB {
 		return $result;
 	}
 	
-	
-	
 	/**
 	 * Permet de rechercher tous les cours qui contiennent le mot et qui n'ont pas utilisés le plugin.
 	 * @param string $mot
@@ -262,10 +260,10 @@ class ManageDB {
 	public function searchCourseNotUsedPlugin($search){
 		global $DB,$CFG;
 		$listeCours = array('-1'=>'All			');
-		$param = array('search'=> $search);
+		$param = array('search'=> "%$search%");
 		$result = $DB->get_records_sql('SELECT mdl_course.id,mdl_course.shortname FROM mdl_course
 				WHERE mdl_course.id NOT IN (SELECT mdl_retrievecourse.courseid_old FROM mdl_retrievecourse)
-				   and mdl_course.shortname LIKE "% :search %" ' , $param);
+				   and mdl_course.shortname LIKE :search ' , $param);
 		foreach ($result as $value){
 			//TODO Temp config
 			$tempSize = $CFG->tempYearOne + $CFG->tempYearTwo;
