@@ -1,11 +1,11 @@
 <?php
 
-require_once '/../view/FormTeacher.php';
-require_once 'ControllerFormTeacher.php';
-require_once 'ControllerFormAdmin.php';
-require_once '/../model/ManageDB.php';
-require_once '/../view/FormAdmin.php';
-require_once '/../model/RetrieveCourseConstante.php';
+require_once (__DIR__ . '/../view/FormTeacher.php');
+require_once (__DIR__ . '/ControllerFormTeacher.php');
+require_once (__DIR__ . '/ControllerFormAdmin.php');
+require_once (__DIR__ . '/../model/ManageDB.php');
+require_once (__DIR__ . '/../view/FormAdmin.php');
+require_once (__DIR__ . '/../model/RetrieveCourseConstante.php');
 
 /**
  * 
@@ -106,10 +106,11 @@ class ControllerPrincipal {
 		global $PAGE;
 		$nextShortname = nextShortname($PAGE->course->shortname);
 		if(!$this->db->checkCourseExist($nextShortname)){
-			?> <script type="text/javascript" charset="utf-8" >
+			?>
+<script type="text/javascript" charset="utf-8">
 					alert("Le cour de l'ann\351e prochaine n'a pas encore \351t\351 cr\351e");
 				</script>
-	 		<?php 
+<?php 
 	 		redirect('http://localhost/course/view.php?id='.$_SESSION['idCourse']);
 	 	}
 	 }
@@ -121,10 +122,11 @@ class ControllerPrincipal {
 		global $PAGE;
 		$course_used = $this->db->checkPluginUsed($_SESSION['idCourse']);
 		if($course_used){
-			?> <script type="text/javascript" charset="utf-8" >
+			?>
+<script type="text/javascript" charset="utf-8">
 					alert("Le plugin a d\351j\340 \351t\351 utilis\351.");
 				</script>
-	 		<?php 
+<?php 
 	 		redirect('http://localhost/course/view.php?id='.$_SESSION['idCourse']);
 		}
 	}
@@ -138,10 +140,11 @@ class ControllerPrincipal {
 		$idCourseNextYear = $this->db->getCourseId(nextShortname($PAGE->course->shortname));
 		$ok = (($idCourseNextYear != NULL) && ($this->db->checkUserEnroledInCourse($idCourseNextYear ,$USER->id)));
 		if(!$ok){
-			?> <script type="text/javascript" charset="utf-8" >
+			?>
+<script type="text/javascript" charset="utf-8">
 					alert("Vous n' \352tes pas le professeur titulaire du cours de l'ann\351e prochaine");
 				</script>
-	 		<?php 
+<?php 
 	 		redirect('http://localhost/course/view.php?id='.$_SESSION['idCourse']);
 		}	
 	}

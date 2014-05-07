@@ -4,9 +4,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
-require_once '/../model/ManageDB.php';
-require_once '/../model/ManageGraphiqueDB.php';
-require_once '/../service/Graphique.php';
+require_once (__DIR__ . '/../model/ManageDB.php');
+require_once (__DIR__ . '/../model/ManageGraphiqueDB.php');
+require_once (__DIR__ . '/../service/Graphique.php');
 
 /**
  * Permet de gérer la vue qui apparaît lorsque l'utilisateur est un administrateur .

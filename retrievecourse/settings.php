@@ -30,8 +30,10 @@ defined('MOODLE_INTERNAL') || die;
 
 $ADMIN->add('reports', new admin_category('retrieveCourse', 'Retrieve Course'));
 
+//$namePlugin = 'Copie '. (substr($CFG->temp,0,$CFG->tempYearOne)+1) .'-'. (substr($CFG->temp,-$CFG->tempYearTwo)+1) .' du cours';
+//$CFG->namePlugin = $namePlugin;
 
-$ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecourse', $CFG->namePlugin , "$CFG->wwwroot/report/retrievecourse/index.php", 'report/log:view'));
+$ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecourse', 'Retrieve Course', "$CFG->wwwroot/report/retrievecourse/index.php", 'report/log:view'));
 
 $ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecoursecron', 'Cron Logs', "$CFG->wwwroot/report/retrievecourse/viewCronTasks.php", 'report/log:view'));
 
@@ -42,9 +44,6 @@ $settings = null;
 $temp = new admin_settingpage('retrievecourse_settings', get_string('retrievecourse_config','report_retrievecourse'));
 
 $temp->add( new admin_setting_configcheckbox('visibilite_plugin', 'visibilite_plugin', '', 1));
-
-$namePlugin = 'Copie '. (substr($CFG->temp,0,$CFG->tempYearOne)+1) .'-'. (substr($CFG->temp,-$CFG->tempYearTwo)+1) .' du cours';
-$CFG->namePlugin = $namePlugin;
 
 // $CFG->tempSize = $CFG->tempYearOne + $CFG->tempYearTwo;
 // var_dump($CFG->tempSize);
@@ -59,20 +58,20 @@ $temp->add(new admin_setting_configtext('tempYearTwo', get_string('tempYearTwo',
 		get_string('retrievecourse_description', 'report_retrievecourse'), 2, PARAM_INT));
 
 
-$choice1 = (substr((date('Y')-2), -$CFG->tempYearOne) . substr((date('Y')-1), -$CFG->tempYearTwo) );
-$choice2 = substr((date('Y')-1), -$CFG->tempYearOne) .substr(date('Y'), -$CFG->tempYearTwo);
-$choice3 = substr((date('Y')), -$CFG->tempYearOne) .substr((date('Y')+1), -$CFG->tempYearTwo);
-$choice4 =  substr((date('Y')+1), -$CFG->tempYearOne) .substr((date('Y')+2), -$CFG->tempYearTwo);
+// $choice1 = (substr((date('Y')-2), -$CFG->tempYearOne) . substr((date('Y')-1), -$CFG->tempYearTwo) );
+// $choice2 = substr((date('Y')-1), -$CFG->tempYearOne) .substr(date('Y'), -$CFG->tempYearTwo);
+// $choice3 = substr((date('Y')), -$CFG->tempYearOne) .substr((date('Y')+1), -$CFG->tempYearTwo);
+// $choice4 =  substr((date('Y')+1), -$CFG->tempYearOne) .substr((date('Y')+2), -$CFG->tempYearTwo);
 
 
 $choices = array(
-	$choice1 => $choice1,
-	$choice2 => $choice2 ,
-	$choice3 => $choice3 ,
-	$choice4 => $choice4
+	'201314' => '201314',
+	'201415' => '201415' ,
+	'201516' => '201516' ,
+	'201617' => '201617'
 );
 
-$temp->add(new admin_setting_configselect('temp', 'Valeur du temp', '',$choice2, $choices));
+$temp->add(new admin_setting_configselect('temp', 'Valeur du temp', '','201314', $choices));
 
 $temp->add(new admin_setting_configtime('cron_heure_debut', 'cron_minute_debut', 'Heure debut', '', array('h'=>18,'m'=>30)));
 $temp->add(new admin_setting_configtime('cron_heure_fin', 'cron_minute_fin', 'Heure fin', '', array('h'=>6,'m'=>30)));

@@ -3,8 +3,8 @@
 require('../../config.php');
 require_once($CFG->dirroot.'/course/lib.php');
 require_once ($CFG->libdir.'/accesslib.php');
-require_once 'classes/model/ManageDB.php';
-require_once 'classes/model/RetrieveCourseConstante.php';
+require_once (__DIR__ . '/classes/model/ManageDB.php');
+require_once (__DIR__ . '/classes/model/RetrieveCourseConstante.php');
 
 defined('MOODLE_INTERNAL') || die;
 

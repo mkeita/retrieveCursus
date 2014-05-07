@@ -1,16 +1,13 @@
 
 <?php 
+
 require('../../config.php');
 require_once($CFG->dirroot.'/course/lib.php');
 require_once ($CFG->libdir.'/accesslib.php');
 
-require_once 'classes/controller/ControllerPrincipal.php';
-
+require_once (__DIR__ . '/classes/controller/ControllerPrincipal.php');
 defined('MOODLE_INTERNAL') || die;
-define('MDL_PERF', true);
-define('MDL_PERFDB', true);
-define('MDL_PERFTOLOG', true);
-define('MDL_PERFTOFOOT', true);
+
 
 $PAGE->requires->jquery();
 $PAGE->requires->jquery_plugin('ui');
@@ -31,6 +28,8 @@ function headerRetrieveCursus(){
 	
 	$id   = optional_param('id', 0, PARAM_INT);// Course ID
 	
+	
+	
 	if($id != NULL){
 		$_SESSION['idCourse'] = $id;
 	}
@@ -41,39 +40,14 @@ function headerRetrieveCursus(){
 	
 	require_login($_SESSION['idCourse']);
 	$PAGE->set_pagelayout('standard');
-	$PAGE->set_title( $CFG->namePlugin);
-	$PAGE->set_heading($CFG->namePlugin );
+	$namePlugin = 'Copie '. (substr($CFG->temp,0,$CFG->tempYearOne)+1) .'-'. (substr($CFG->temp,-$CFG->tempYearTwo)+1) .' du cours';
+	$PAGE->set_title( $namePlugin);
+	$PAGE->set_heading($namePlugin );
 	$PAGE->set_url('/report/retrievecourse/index.php');
 	echo $OUTPUT->header();
 }
 
-// function send_email($userid , $shortname){
-// 	global $DB;
-	
-// 	$message = 'Bonjour, </br> </br>';
-// 	$message .= $shortname . ' disponible';
-	
-// 	$userto = $DB->get_record('user', array("id"=>$userid));
-	
-// 	$admin = get_admin();
-// 	$admin->priority = 1;
-	
-// 	//Send the message
-// 	$eventdata = new stdClass();
-// 	$eventdata->modulename        = 'moodle';
-// 	$eventdata->userfrom          = $admin;
-// 	$eventdata->userto            = $userto;
-// 	$eventdata->subject           = utf8_encode('Récupération des informations dans le cours ' . $shortname);
-// 	$eventdata->fullmessage       = $message;
-// 	$eventdata->fullmessageformat = FORMAT_PLAIN;
-// 	$eventdata->fullmessagehtml   = '';
-// 	$eventdata->smallmessage      = '';
-// 	$eventdata->component         = 'moodle';
-// 	$eventdata->name         = 'backup';
-// 	$eventdata->notification = 1;
-// 	message_send($eventdata);
-	
-// }
+
 ?>
 
 

@@ -311,8 +311,12 @@ class ManageDB {
 	 */
 	public function getIdCronRunning(){
 		global $DB;
-		$obj = $DB->get_records_sql('SELECT id from mdl_retrievecourse_cron WHERE mdl_retrievecourse_cron.status = 1');
-		return ($obj == NULL) ? NULL : $obj[0]->id;
+		$obj = $DB->get_records_sql('SELECT id from mdl_retrievecourse_cron WHERE mdl_retrievecourse_cron.status = "execute"' );
+		$id;
+		foreach($obj as $val){
+			$id = $val->id;
+		}
+		return ($obj == NULL) ? NULL : $id;
 	}
 	
 	public function getCategoryId($nameCategory){

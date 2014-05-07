@@ -2,7 +2,17 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-
+function message($msg , $url = '../..'){
+	global $OUTPUT;
+	?>
+		<div id="message"
+		style="width: 60%; margin-left: auto; margin-right: auto; border-width: 1px; border-style: solid; background-color: #EEE; border-color: #BBB; text-align: center">
+					<?php echo $msg;
+					echo $OUTPUT->continue_button($url);
+					?>
+				</div>
+	<?php 
+}
 
 function getNamePlugin(){
 	global $CFG;

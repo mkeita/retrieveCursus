@@ -1,5 +1,5 @@
 <?php
-require_once '/../model/ManageDB.php';
+require_once (__DIR__ . '/../model/ManageDB.php');
 
 class Graphique{
 	
@@ -23,9 +23,9 @@ class Graphique{
 	public function genererGraphique($data,$divId,$title){
 		?>
 		
-		<script type="text/javascript" src="/report/retrievecourse/lib/jqplot/dist/jquery.jqplot.min.js"></script>
-		<link rel='stylesheet' type="text/css" href="/report/retrievecourse/lib/jqplot/dist/jquery.jqplot.min.css"/>
-		<script type="text/javascript" src="/report/retrievecourse/lib/jqplot/dist/plugins/jqplot.pieRenderer.min.js"></script>
+		<script type="text/javascript" src="lib/jqplot/dist/jquery.jqplot.min.js"></script>
+		<link rel='stylesheet' type="text/css" href="lib/jqplot/dist/jquery.jqplot.min.css"/>
+		<script type="text/javascript" src="lib/jqplot/dist/plugins/jqplot.pieRenderer.min.js"></script>
 		 <script>
 
 		 	 var <?php echo $divId; ?> = new Array();

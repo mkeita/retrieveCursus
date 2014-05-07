@@ -1,10 +1,10 @@
 <?php
 
-require_once '/../view/FormAdmin.php';
-require_once '/../service/RetrieveCourseService.php';
-require_once '/../model/RetrieveCourseConstante.php';
-require_once '/../../outils.php';
-require_once '/../service/RetrieveCourseService.php';
+require_once (__DIR__ . '/../view/FormAdmin.php');
+require_once (__DIR__ . '/../service/RetrieveCourseService.php');
+require_once (__DIR__ . '/../model/RetrieveCourseConstante.php');
+require_once (__DIR__ . '/../../outils.php');
+require_once (__DIR__ . '/../service/RetrieveCourseService.php');
 
 /**
  * 
@@ -68,8 +68,8 @@ class ControllerFormAdmin {
 	public function backup_immediat($courJson){
 		global $USER,$PAGE,$CFG;
 		if(isset($courJson)){
-			echo '<div id="conteneur" style="display:block; background-color:transparent; width:80%; border:1px solid #000000;">
-					<div id="barre" style="display:block; background-color:rgba(132, 232, 104, 0.7); width:0%; height:100%;float:top;clear : top ;clear:both">
+			echo '<div id="conteneur" style="display:block; background-color:transparent; width:80%;  border:1px solid #000000;">
+					<div id="barre" style="display:block; background-color:rgba(132, 232, 104, 0.7); width:0%; height:10%;float:top;clear : top ;clear:both">
 						<div id="pourcentage" style="text-align:right; height:100%; font-size:1.8em;">
 							&nbsp;
 						</div>
@@ -88,6 +88,8 @@ class ControllerFormAdmin {
 				progression($indice);
 				$this->service->currentProgress = $indice;
 				if($shortname != NULL){
+					var_dump($idCourse);
+					var_dump($nextShortname);
 					$this->service->setCourse($idCourse);
 					$this->service->setNextShortName($nextShortname);
 					$this->service->runService($nbElemRestore);
@@ -118,6 +120,9 @@ class ControllerFormAdmin {
 					
 				}
 			}
+			
+			message(utf8_encode("Les cours seront traités ultérieurement via cron. </br>"),'/report/retrievecourse/viewCronTasks.php');
+			
 		}
 	}
 	

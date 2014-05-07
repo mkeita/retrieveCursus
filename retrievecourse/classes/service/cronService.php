@@ -2,14 +2,14 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once '/../model/ManageDB.php';
-require_once 'RetrieveCourseService.php';
-require_once '/../model/RetrieveCourseConstante.php';
+
 require_once ($CFG->libdir.'/messagelib.php');
 require_once ($CFG->libdir.'/datalib.php');
+require_once (__DIR__ . '/../model/ManageDB.php');
+require_once (__DIR__ . '/RetrieveCourseService.php');
+require_once (__DIR__ . '/../model/RetrieveCourseConstante.php');
 
 class cronService {
-	
 	
 	/**
 	 * 
@@ -21,7 +21,9 @@ class cronService {
 	 * @var RetrieveCourseService
 	 */
 	private $service;
+	
 	function __construct(){
+		mtrace("constructeur service");
 		$this->db = new ManageDB();
 		$this->service = new RetrieveCourseService(null, null, null , RetrieveCourseConstante::USE_CRON);
 	}
@@ -36,6 +38,7 @@ class cronService {
 				$this->initialiserService($cron->courseid, $cron->user , $cron->shortname_course_new );
 				$this->db->updateFlagStatus($cron->id , RetrieveCourseConstante::STATUS_EXECUTE);
 				$this->db->updateTimeStart($cron->id, time());
+				
 				$this->service->runService();
 				$this->db->deleteCron($cron->id);
 				$this->db->cronFinish($cron->id, $cron->courseid);
@@ -44,8 +47,6 @@ class cronService {
 		} 
 	}
 	
-	
-
 	private function send_email($userid , $shortname){
 		global $DB;
 	
