@@ -18,7 +18,7 @@ require_once (__DIR__ . '/../model/RetrieveCourseConstante.php');
  * @author Ilias
  *
  */
-class RetrieveCourseService {
+class RetrieveCourseService{
 	/** Automated backups are active and ready to run */
 	const STATE_OK = 0;
 	/** Automated backups are disabled and will not be run */
@@ -80,6 +80,10 @@ class RetrieveCourseService {
 	 * @var ManageDB
 	 */
 	private $db;
+	
+	private $pathnamehash;
+	
+	private $contenthash;
 	
 
 	
@@ -151,15 +155,8 @@ class RetrieveCourseService {
 		$bc->execute_plan();	
 		$bc_results = $bc->get_results();
 		
-		$tmpdir = $CFG->tempdir . '/backup/';
-		//var_dump($tmpdir); echo '</br>';
 		$this->folder = $bc->get_backupid();
 		
-		echo '</br>'; var_dump($tmpdir . $this->folder);echo '</br>';
-		
-// 		$Bkpfile = $bc_results['backup_destination'];
-		
-// 		var_dump($Bkpfile);
 		
 		$this->currentProgress = $progress->getProgress();	
 	}
@@ -173,15 +170,30 @@ class RetrieveCourseService {
      * @return bool
      */
     private  function launch_automated_backup($course, $starttime, $userid) {
-    	mtrace('launch_automated_backup');
+    	global $CFG;
+    	if($this->flagcron == RetrieveCourseConstante::USE_BACKUP_IMMEDIATELLY){
+    		echo "<script>";
+    		echo "document.getElementById('progress_bar_course').innerHTML='Backup du cour : ".$this->db->getShortnameCourse($this->course)."';";
+    		echo "</script>";
+    	}
         $outcome = self::BACKUP_STATUS_OK;
         $config = get_config('backup');
         $dir = $config->backup_auto_destination;
         $storage = (int)$config->backup_auto_storage;
-
-
+	
+		
         $bc = new backup_controller(backup::TYPE_1COURSE, $course, backup::FORMAT_MOODLE, backup::INTERACTIVE_NO,
                 backup::MODE_AUTOMATED, $userid);
+        
+        $backup = new import_ui($bc);
+        // Process the current stage
+        $backup->process();
+        
+        $logger = new WebCTServiceLogger($CFG->debugdeveloper ? backup::LOG_DEBUG : backup::LOG_INFO);
+        $progress = new WebCTServiceProgress($logger,$this->flagcron,$this->currentProgress,$this->step);
+        $progress->start_progress('', 1);
+        $backup->get_controller()->set_progress($progress);
+        $backup->get_controller()->add_logger($logger);
 
         try {
 
@@ -258,7 +270,13 @@ class RetrieveCourseService {
         }
 		
         $this->folder = $bc->get_backupid();
+        $this->currentProgress = $progress->getProgress();
         
+        $stored_file = $bc->get_plan()->get_results();
+
+        $this->contenthash =  $stored_file['backup_destination']->get_contenthash();
+        $this->pathnamehash = $stored_file['backup_destination']->get_pathnamehash();
+       
         $bc->destroy();
         unset($bc);
 
@@ -292,7 +310,6 @@ class RetrieveCourseService {
     
 	private function restore(){
 		global $DB,$CFG,$USER;
-		mtrace('restore');
 		if($this->folder != NULL){
 			if($this->flagcron == RetrieveCourseConstante::USE_BACKUP_IMMEDIATELLY){
 				echo "<script>";
@@ -314,10 +331,19 @@ class RetrieveCourseService {
 				$logger = new WebCTServiceLogger($CFG->debugdeveloper ? backup::LOG_DEBUG : backup::LOG_INFO);
 				$progress = new WebCTServiceProgress($logger, $this->flagcron ,$this->currentProgress, $this->step);
 				
-				
-				$controller = new restore_controller($this->folder, $courseId,
-						backup::INTERACTIVE_NO, backup::MODE_SAMESITE, $USER->id,
-						 backup::TARGET_EXISTING_DELETING,$progress);
+				//Récupérer de moodle fichier "restore.php" et "restorefile.php"
+				$contextid = $this->db->getContextid($this->course);
+				//Dezippage
+				$fs = get_file_storage();
+				$storedfile = $fs->get_file_by_hash($this->pathnamehash);
+				if (!$storedfile || $storedfile->get_contenthash() !== $this->contenthash) {
+					throw new restore_ui_exception('invalidrestorefile');
+				}
+				$outcome = $this->extract_file_to_dir($storedfile , $contextid);
+				//Récupére filepath
+				$controller = new restore_controller($this->filepath, $courseId, backup::INTERACTIVE_NO,
+						backup::MODE_GENERAL, $USER->id, backup::TARGET_EXISTING_DELETING,$progress);
+			
 				$controller->add_logger($logger);
 				
 				$controller->execute_precheck();
@@ -330,6 +356,22 @@ class RetrieveCourseService {
 			
 		}
 		
+	}
+
+	/**
+	 * Extracts the file.
+	 *
+	 * @param string|stored_file $source Archive file to extract
+	 */
+	private function extract_file_to_dir($source , $contextid) {
+		global $CFG, $USER;
+	
+		$this->filepath = restore_controller::get_tempdir_name($contextid, $USER->id);
+		
+		$fb = get_file_packer('application/vnd.moodle.backup');
+		$result = $fb->extract_to_pathname($source,
+				$CFG->tempdir . '/backup/' . $this->filepath . '/');
+		return $result;
 	}
 	
 	public function setCourse($idCourse){
@@ -354,8 +396,7 @@ class WebCTServiceLogger extends base_logger {
 		$depth = isset($options['depth']) ? $options['depth'] : 0;
 		// Depending of running from browser/command line, format differently
 		error_log($prefix . str_repeat('  ', $depth) . $message);
-		echo '</br>'; var_dump($message); echo '</br>';
-				flush();
+	
 		return true;
 	}
 }

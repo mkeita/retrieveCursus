@@ -6,11 +6,11 @@ function message($msg , $url = '../..'){
 	global $OUTPUT;
 	?>
 		<div id="message"
-		style="width: 60%; margin-left: auto; margin-right: auto; border-width: 1px; border-style: solid; background-color: #EEE; border-color: #BBB; text-align: center">
-					<?php echo $msg;
+		style="width: 60%; margin-left: auto; margin-right: auto; border-width: 1px; border-style: solid; background-color: #00000; border-color: #BBB; text-align: left">
+					<?php echo $msg . '</br>';
 					echo $OUTPUT->continue_button($url);
 					?>
-				</div>
+		</div>
 	<?php 
 }
 

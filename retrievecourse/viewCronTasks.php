@@ -8,9 +8,9 @@ require_once (__DIR__ . '/classes/model/RetrieveCourseConstante.php');
 
 defined('MOODLE_INTERNAL') || die;
 
-// $PAGE->requires->jquery();
-// $PAGE->requires->jquery_plugin('ui');
-// $PAGE->requires->jquery_plugin('ui-css');
+$PAGE->requires->jquery();
+$PAGE->requires->jquery_plugin('ui');
+$PAGE->requires->jquery_plugin('ui-css');
 
 echo '<link rel="stylesheet" href="lib/DataTables-1.9.4/media/css/jquery.dataTables.css" type="text/css"> ';
 
@@ -46,7 +46,7 @@ if($data == NULL){
 	echo '</table>';
 }
 
-echo '<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>';
+//echo '<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>';
 echo '<script type="text/javascript" src="lib/DataTables-1.9.4/media/js/jquery.dataTables.min.js"></script> ';
 
 echo'<script type="text/javascript">

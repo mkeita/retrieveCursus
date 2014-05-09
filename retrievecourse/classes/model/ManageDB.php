@@ -359,7 +359,7 @@ class ManageDB {
 	 * @param string $contextlevel
 	 * @return NULL en cas d'erreur sinon l'id du context.
 	 */
-	private function getContextid($courseid,$contextlevel = CONTEXT_COURSE){
+	public function getContextid($courseid,$contextlevel = CONTEXT_COURSE){
 		global $DB;
 		$data = $DB->get_record('context', array("instanceid"=>$courseid ,"contextlevel"=>$contextlevel),'id');
 		return (($data != NULL) ? $data->id : NULL);

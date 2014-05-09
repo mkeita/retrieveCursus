@@ -1,9 +1,9 @@
 <?php
-var_dump(__DIR__);
 require_once (__DIR__ . '/../model/ManageDB.php');
 require_once (__DIR__ . '/../view/FormTeacher.php');
 require_once (__DIR__ . '/../service/RetrieveCourseService.php');
 require_once (__DIR__ . '/../model/RetrieveCourseConstante.php');
+require_once (__DIR__ . '/../../outils.php');
 /**
  * 
  * @author Ilias
@@ -59,14 +59,7 @@ class ControlleurFormTeacher {
 		$msg = utf8_encode('La récupération des informations de votre cours se fera ultérieurement. </br>') ;
 		$msg .=utf8_encode('Vous recevrez un email une fois vos informations récupérées. </br></br></br>') ;
 		
-		?>
-	<div id="message"
-	style="width: 60%; margin-left: auto; margin-right: auto; border-width: 1px; border-style: solid; background-color: #EEE; border-color: #BBB; text-align: center">
-				<?php echo $msg;
-				echo $OUTPUT->continue_button('../..');
-				?>
-			</div>
-<?php 
+		message($msg);
 		
 		
 		

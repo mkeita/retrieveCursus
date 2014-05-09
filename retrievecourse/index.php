@@ -15,6 +15,9 @@ $PAGE->requires->jquery_plugin('ui-css');
 
 headerRetrieveCursus();
 
+// $admin = get_admins();
+// var_dump($admin);
+
 $controller = new ControllerPrincipal();
 $controller->verification();
 $controller->display();

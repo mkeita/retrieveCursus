@@ -111,7 +111,7 @@ class ControllerPrincipal {
 					alert("Le cour de l'ann\351e prochaine n'a pas encore \351t\351 cr\351e");
 				</script>
 <?php 
-	 		redirect('http://localhost/course/view.php?id='.$_SESSION['idCourse']);
+	 		redirect('/course/view.php?id='.$_SESSION['idCourse']);
 	 	}
 	 }
 	
@@ -127,7 +127,7 @@ class ControllerPrincipal {
 					alert("Le plugin a d\351j\340 \351t\351 utilis\351.");
 				</script>
 <?php 
-	 		redirect('http://localhost/course/view.php?id='.$_SESSION['idCourse']);
+	 		redirect('/course/view.php?id='.$_SESSION['idCourse']);
 		}
 	}
 	
@@ -145,7 +145,7 @@ class ControllerPrincipal {
 					alert("Vous n' \352tes pas le professeur titulaire du cours de l'ann\351e prochaine");
 				</script>
 <?php 
-	 		redirect('http://localhost/course/view.php?id='.$_SESSION['idCourse']);
+	 		redirect('/course/view.php?id='.$_SESSION['idCourse']);
 		}	
 	}
 	

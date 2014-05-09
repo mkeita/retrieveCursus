@@ -66,7 +66,7 @@ class ControllerFormAdmin {
 	 * Liste des cours dont il faut faire le backup.
 	 */
 	public function backup_immediat($courJson){
-		global $USER,$PAGE,$CFG;
+		global $USER,$PAGE,$CFG,$OUTPUT;
 		if(isset($courJson)){
 			echo '<div id="conteneur" style="display:block; background-color:transparent; width:80%;  border:1px solid #000000;">
 					<div id="barre" style="display:block; background-color:rgba(132, 232, 104, 0.7); width:0%; height:10%;float:top;clear : top ;clear:both">
@@ -88,8 +88,6 @@ class ControllerFormAdmin {
 				progression($indice);
 				$this->service->currentProgress = $indice;
 				if($shortname != NULL){
-					var_dump($idCourse);
-					var_dump($nextShortname);
 					$this->service->setCourse($idCourse);
 					$this->service->setNextShortName($nextShortname);
 					$this->service->runService($nbElemRestore);
@@ -97,6 +95,9 @@ class ControllerFormAdmin {
 				}
 				$indice += 100 /(count($nbElemRestore)*2 );
 			}
+			
+			$msg = utf8_encode("Backup/Restore terminé avec succés");
+			message($msg,'index.php');
 		}
 	}
 	
