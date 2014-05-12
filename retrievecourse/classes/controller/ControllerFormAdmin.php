@@ -3,6 +3,9 @@
 require_once (__DIR__ . '/../view/FormAdmin.php');
 require_once (__DIR__ . '/../service/RetrieveCourseService.php');
 require_once (__DIR__ . '/../model/RetrieveCourseConstante.php');
+require_once (__DIR__ . '/../model/ManageRetrieveCourseDB.php');
+require_once (__DIR__ . '/../model/ManageRetrieveCourseCronDB.php');
+require_once (__DIR__ . '/../model/ManageDB.php');
 require_once (__DIR__ . '/../../outils.php');
 require_once (__DIR__ . '/../service/RetrieveCourseService.php');
 
@@ -18,12 +21,16 @@ class ControllerFormAdmin {
 	 */
 	private $formAdmin;
 	private $db; 
+	private $retrievecoursedb;
+	private $crondb;
 	private $service;
 	
 	function __construct($formAdmin){
 		global $USER;
 		$this->formAdmin = $formAdmin;
 		$this->db = new ManageDB();
+		$this->crondb = new ManageRetrieveCourseCronDB();
+		$this->retrievecoursedb = new ManageRetrieveCourseDB();
 		$this->service = new RetrieveCourseService(null, $USER->id, null);
 	}
 	
@@ -31,10 +38,10 @@ class ControllerFormAdmin {
 		global $PAGE;
 		
 		if ($this->formAdmin->is_cancelled()){
-			redirect("../..");
+			redirection("../..");
 		}elseif ($this->formAdmin->no_submit_button_pressed()) {
 			//Rentrera ici lorsque l'utilisateur appuiera sur le bouton "trie" .
-			$this->formAdmin->envoiInfoTrie();
+			$this->envoiInfoTrie();
 		}elseif ($this->formAdmin->is_submitted()){
 			$infoForm=$this->formAdmin->get_submitted_data();
 			$message_cron =utf8_encode('Êtes-vous sûr de vouloir faire un backup/restore via cron?');
@@ -46,6 +53,22 @@ class ControllerFormAdmin {
 		} 
 	}
 	
+	
+	private function envoiInfoTrie(){
+		global $PAGE;
+		$data = $this->formAdmin->get_submitted_data();
+		$url = $PAGE->url . '?';
+		if($data->recherche != ""){
+			$url .= 'search='. $data->recherche;
+		}else{
+			$idCategory = ($data->category == -1) ? NULL : $data->category ;
+			$url .= 'categories=' . $idCategory;
+		}
+		redirection($url);
+
+	}
+	
+	
 	private function confirmation($message , $type_confirmation , $cours){
 		global $PAGE,$OUTPUT;
 		//Dans le cas où on a coché All.
@@ -53,7 +76,10 @@ class ControllerFormAdmin {
 			//Enléve toute les valeur pour que le type de tableau est identique qu'on séléctionne all ou plusieur cour.
 			//En effet , si on séléctionne pas ALL mais qu'on séléctionne des cours manuellement , '$cours' contiendra juste les id des
 			//cours séléctionné.
+			
 			$cours = array_keys($this->formAdmin->getListeCour());
+			
+			
 		}
 		echo $OUTPUT->confirm($message, '/report/retrievecourse/index.php?confirmation='. $type_confirmation .
 				'&cour='.json_encode($cours) , '/report/retrievecourse/index.php');
@@ -79,9 +105,15 @@ class ControllerFormAdmin {
 				<label id="progress_bar_course"></label>';
 	
 			$cour = json_decode($courJson);
+			if($cour[0] == -1){
+				unset($cour[0]);
+			}
+			var_dump($cour);
 			$indice = 0;
-			$nbElemRestore = count($cour) ;
-			$this->service->step =1/(count($nbElemRestore)*2);
+			//BAckup/restore pour un cour
+			$nbElemRestore = count($cour) * 2 ;
+			$this->service->step =1/($nbElemRestore);
+			var_dump($this->service->step);
 			foreach ($cour as $idCourse){
 				$shortname =  $this->db->getShortnameCourse($idCourse);
 				$nextShortname = nextShortname($shortname);
@@ -91,9 +123,9 @@ class ControllerFormAdmin {
 					$this->service->setCourse($idCourse);
 					$this->service->setNextShortName($nextShortname);
 					$this->service->runService($nbElemRestore);
-					$this->db->addCourse_retrievecourse($shortname , $nextShortname , $CFG->temp , $idCourse);
+					$this->retrievecoursedb->addCourse_retrievecourse($shortname , $nextShortname , $CFG->temp , $idCourse);
 				}
-				$indice += 100 /(count($nbElemRestore)*2 );
+				$indice += (100 /($nbElemRestore ))*2;
 			}
 			
 			$msg = utf8_encode("Backup/Restore terminé avec succés");
@@ -114,9 +146,9 @@ class ControllerFormAdmin {
 				$shortname =  $this->db->getShortnameCourse($idCourse);
 				if($shortname != NULL){
 					$nextShortname = nextShortname($shortname);
-					if(!$this->db->checkPluginUsed($idCourse)){
-						$this->db->addCourse_cron($idCourse, $USER->id , $nextShortname);
-						$this->db->addCourse_retrievecourse($shortname , $nextShortname , $CFG->temp , $idCourse ,false , true );
+					if(!$this->retrievecoursedb->checkPluginUsed($idCourse)){
+						$this->crondb->addCourse_cron($idCourse, $USER->id , $nextShortname);
+						$this->retrievecoursedb->addCourse_retrievecourse($shortname , $nextShortname , $CFG->temp , $idCourse ,false , true );
 					}
 					
 				}

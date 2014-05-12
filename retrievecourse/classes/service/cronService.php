@@ -5,17 +5,17 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once ($CFG->libdir.'/messagelib.php');
 require_once ($CFG->libdir.'/datalib.php');
-require_once (__DIR__ . '/../model/ManageDB.php');
+require_once (__DIR__ . '/../model/ManageRetrieveCourseCronDB.php');
 require_once (__DIR__ . '/RetrieveCourseService.php');
 require_once (__DIR__ . '/../model/RetrieveCourseConstante.php');
 
 class cronService {
-	
+
 	/**
 	 * 
-	 * @var ManageDB
+	 * @var ManageRetrieveCourseCronDB
 	 */
-	private $db;
+	private $crondb;
 	/**
 	 * 
 	 * @var RetrieveCourseService
@@ -23,25 +23,24 @@ class cronService {
 	private $service;
 	
 	function __construct(){
-		mtrace("constructeur service");
-		$this->db = new ManageDB();
+		$this->crondb = new ManageRetrieveCourseCronDB();
 		$this->service = new RetrieveCourseService(null, null, null , RetrieveCourseConstante::USE_CRON);
 	}
 	
 	public function launchBackupRestore(){
-		$listeCron = $this->db->retrieveCron();
+		$listeCron = $this->crondb->retrieveCron();
 		foreach($listeCron as $cron){
 			if(!$this->verifierPlageHoraire()){
 				break;
 			}
-			if($this->db->getFlagStatus($cron->id) != RetrieveCourseConstante::STATUS_ERROR){
+			if($this->crondb->getFlagStatus($cron->id) != RetrieveCourseConstante::STATUS_ERROR){
 				$this->initialiserService($cron->courseid, $cron->user , $cron->shortname_course_new );
-				$this->db->updateFlagStatus($cron->id , RetrieveCourseConstante::STATUS_EXECUTE);
-				$this->db->updateTimeStart($cron->id, time());
+				$this->crondb->updateFlagStatus($cron->id , RetrieveCourseConstante::STATUS_EXECUTE);
+				$this->crondb->updateTimeStart($cron->id, time());
 				
 				$this->service->runService();
-				$this->db->deleteCron($cron->id);
-				$this->db->cronFinish($cron->id, $cron->courseid);
+				$this->crondb->deleteCron($cron->id);
+				$this->crondb->cronFinish($cron->id, $cron->courseid);
 				$this->send_email($cron->user , $cron->shortname_course_new  );
 			}
 		} 
@@ -110,18 +109,18 @@ class cronService {
 	private function isRunning(){
 		global $CFG;
 		$is_running = false;
-		$idCron = $this->db->getIdCronRunning();
+		$idCron = $this->crondb->getIdCronRunning();
 		//Si getIdCronRunning() retourne NULL c'est qu'il n'y aucun processus cron qui tourne.
 		if($idCron != NULL){
 			$timelose = 60 *90;
-			$lastTime_modified = $this->db->getTimeModifiedCron($id);
+			$lastTime_modified = $this->crondb->getTimeModifiedCron($idCron);
 			//On considére qu'aprés 1h30 d'inactivité , le processus est mort.
 			if($lastTime_modified + $timelose <= time()){
-				$this->db->updateNbTentative($idCron, $this->db->getCronTentative($idCron) +1 );
-				if($this->db->getCronTentative($idCron)  == $CFG->nbTentativeMax ){
-					$this->db->updateFlagStatus($idCron,RetrieveCourseConstante::STATUS_ERROR );
+				$this->crondb->updateNbTentative($idCron, $this->crondb->getCronTentative($idCron) +1 );
+				if($this->crondb->getCronTentative($idCron)  == $CFG->nbTentativeMax ){
+					$this->crondb->updateFlagStatus($idCron,RetrieveCourseConstante::STATUS_ERROR );
 				}else{
-					$this->db->updateFlagStatus($idCron,RetrieveCourseConstante::STATUS_WAITING );
+					$this->crondb->updateFlagStatus($idCron,RetrieveCourseConstante::STATUS_WAITING );
 				}
 			}else{
 				$is_running = true;

@@ -37,6 +37,8 @@ $ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecourse', 'Re
 
 $ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecoursecron', 'Cron Logs', "$CFG->wwwroot/report/retrievecourse/viewCronTasks.php", 'report/log:view'));
 
+$ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecourselogs', 'Plugin Logs ', "$CFG->wwwroot/report/retrievecourse/viewRetrieveCourseLogs.php", 'report/log:view'));
+
 $settings = null;
 
 
@@ -79,8 +81,6 @@ $temp->add(new admin_setting_configtime('cron_heure_fin', 'cron_minute_fin', 'He
 $temp->add(new admin_setting_configtext('nbTentativeMax', get_string('nbTentativeMax', 'report_retrievecourse'),
 		get_string('retrievecourse_description', 'report_retrievecourse'), 2, PARAM_INT));
 
-$temp->add(new admin_setting_configtext('idAdminUser', get_string('adminUser', 'report_retrievecourse'),
-		get_string('retrievecourse_description', 'report_retrievecourse'), 2, PARAM_INT));
 
 $ADMIN->add('retrieveCourse', $temp);
 

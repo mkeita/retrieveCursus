@@ -11,10 +11,15 @@ class ManageGraphiqueDB {
 	 */
 	public function getNbAdminBackupImmediat(){
 		global $DB,$CFG;
-		$result = $DB->get_records_sql('SELECT COUNT(*) as nbadmin FROM mdl_retrievecourse WHERE user = :userid
-				AND flag_use_cron = false AND flag_wait_cron_execute = false ' , array('userid'=>$CFG->idAdminUser));
-		foreach ($result as $nb);
-		return ($result != NULL) ? $nb->nbadmin : NULL;
+		$nbAdmin = 0;
+		$result = $DB->get_records_sql('SELECT id,user FROM mdl_retrievecourse WHERE flag_use_cron = false 
+					AND flag_wait_cron_execute = false ' );
+		foreach ($result as $key=>$value){
+			if(array_key_exists($value->user , get_admins())){
+				$nbAdmin++;
+			}
+		}
+		return $nbAdmin;
 	}
 	
 	
@@ -24,10 +29,15 @@ class ManageGraphiqueDB {
 	 */
 	public function getNbAdminBackupCron(){
 		global $DB,$CFG;
-		$result = $DB->get_records_sql('SELECT COUNT(*) as nbadmin FROM mdl_retrievecourse WHERE user = :userid
-				AND (flag_use_cron = true OR flag_wait_cron_execute = true) ' , array('userid'=>$CFG->idAdminUser));
-		foreach ($result as $nb);
-		return ($result != NULL) ? $nb->nbadmin : NULL;
+		$nbAdmin = 0;
+		$result = $DB->get_records_sql('SELECT id,user FROM mdl_retrievecourse WHERE flag_use_cron = true
+					OR flag_wait_cron_execute = true ' );
+		foreach ($result as $key=>$value){
+			if(array_key_exists($value->user , get_admins())){
+				$nbAdmin++;
+			}
+		}
+		return $nbAdmin;
 	}
 	
 	/**
@@ -36,18 +46,27 @@ class ManageGraphiqueDB {
 	 */
 	public function getNbTeacherChoiceNewCourse(){
 		global $DB,$CFG;
-		$result = $DB->get_records_sql('SELECT COUNT(*) as nbadmin FROM mdl_retrievecourse WHERE user != :userid
-			AND flag_newcourse = true ' , array('userid'=>$CFG->idAdminUser));
-		foreach ($result as $nb);
-		return ($result != NULL) ? $nb->nbadmin : NULL;
+		$nbAdmin = 0;
+		$result = $DB->get_records_sql('SELECT id,user FROM mdl_retrievecourse WHERE flag_newcourse = true ' );
+		foreach ($result as $key=>$value){
+			if(!array_key_exists($value->user , get_admins())){
+				$nbAdmin++;
+			}
+		}
+		return $nbAdmin;
 	}
 	
 	public function getNbTeacherChoiceBackup(){
 		global $DB,$CFG;
-		$result = $DB->get_records_sql('SELECT COUNT(*) as nbadmin FROM mdl_retrievecourse WHERE user != :userid
-				AND (flag_use_cron = true OR flag_wait_cron_execute = true) ' , array('userid'=>$CFG->idAdminUser));
-		foreach ($result as $nb);
-		return ($result != NULL) ? $nb->nbadmin : NULL;
+		$nbAdmin = 0;
+		$result = $DB->get_records_sql('SELECT id,user FROM mdl_retrievecourse WHERE (flag_use_cron = true
+				 OR flag_wait_cron_execute = true) ' );
+		foreach ($result as $key=>$value){
+			if(!array_key_exists($value->user , get_admins())){
+				$nbAdmin++;
+			}
+		}
+		return $nbAdmin;
 	}
 	
 	public function getNbCourNotUsedPlugin(){

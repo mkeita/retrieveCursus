@@ -2,6 +2,8 @@
 require_once (__DIR__ . '/../model/ManageDB.php');
 require_once (__DIR__ . '/../view/FormTeacher.php');
 require_once (__DIR__ . '/../service/RetrieveCourseService.php');
+require_once (__DIR__ . '/../model/ManageRetrieveCourseDB.php');
+require_once (__DIR__ . '/../model/ManageRetrieveCourseCronDB.php');
 require_once (__DIR__ . '/../model/RetrieveCourseConstante.php');
 require_once (__DIR__ . '/../../outils.php');
 /**
@@ -19,6 +21,10 @@ class ControlleurFormTeacher {
 	 * @var ManageDB
 	 */
 	private $db;
+	
+	private $crondb;
+	
+	private $retrievecoursedb;
 	/**
 	 * 
 	 * @var RetrieveCourseService
@@ -34,6 +40,8 @@ class ControlleurFormTeacher {
 	function __construct($formTeacher){
 		$this->formTeacher = $formTeacher;
 		$this->db = new ManageDB();
+		$this->crondb = new ManageRetrieveCourseCronDB();
+		$this->retrievecoursedb = new ManageRetrieveCourseDB();
 	}
 	
 	
@@ -54,7 +62,7 @@ class ControlleurFormTeacher {
 	
 	public function choiceRetrieve($nextShortname){
 		global $USER , $OUTPUT, $PAGE;
-		$this->db->addCourse_cron($_SESSION['idCourse'], $USER->id , $nextShortname);
+		$this->crondb->addCourse_cron($_SESSION['idCourse'], $USER->id , $nextShortname);
 		$this->courseUsePlugin(0, 1,$nextShortname);
 		$msg = utf8_encode('La récupération des informations de votre cours se fera ultérieurement. </br>') ;
 		$msg .=utf8_encode('Vous recevrez un email une fois vos informations récupérées. </br></br></br>') ;
@@ -67,7 +75,7 @@ class ControlleurFormTeacher {
 	
 	public function choiceNewCourse($nextShortname){
 		$this->courseUsePlugin(1, 0,$nextShortname);
- 		redirect('../..');
+ 		redirection('../..');
 	}
 	
 	/**
@@ -79,7 +87,7 @@ class ControlleurFormTeacher {
 		$shortname = $this->db->getShortnameCourse($_SESSION['idCourse']);
 		$taille = $CFG->tempYearOne + $CFG->tempYearTwo ; 
 		$temp = substr($shortname, -$taille );
-		$this->db->addCourse_retrievecourse($shortname , $nextShortname , $temp , $_SESSION['idCourse'] , $flag_newcourse , $flag_wait_cron );
+		$this->retrievecoursedb->addCourse_retrievecourse($shortname , $nextShortname , $temp , $_SESSION['idCourse'] , $flag_newcourse , $flag_wait_cron );
 	}
 	
 }

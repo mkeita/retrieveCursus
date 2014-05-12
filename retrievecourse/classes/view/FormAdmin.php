@@ -22,6 +22,8 @@ class FormAdmin extends moodleform{
 		
 		$mform = $this->_form; 
 		$this->db = new ManageDB();
+		
+		$this->retrievecoursedb = new ManageRetrieveCourseDB();
 		$idCategory = null;
 		
 		$this->creationGraphique($mform);
@@ -51,16 +53,13 @@ class FormAdmin extends moodleform{
 	}
 	
 	
-	
 	private function initialiserListeCour(){
 		$search = optional_param('search', '', PARAM_TEXT);
-		$category = optional_param('categories', '', PARAM_TEXT);
+		$category = optional_param('categories', NULL, PARAM_TEXT);
 		if($search != NULL){
-			$this->listeCour = $this->db->searchCourseNotUsedPlugin($search);
-		}elseif($category != NULL){
-			$this->listeCour = $this->db->courseNotUsedPugin($category);
+			$this->listeCour = $this->retrievecoursedb->searchCourseNotUsedPlugin($search);
 		}else{
-			$this->listeCour =  $this->db->courseNotUsedPugin();
+			$this->listeCour = $this->retrievecoursedb->courseNotUsedPugin($category);
 		}
 	}
 	
@@ -116,18 +115,6 @@ class FormAdmin extends moodleform{
 		
 	}
 	
-	public function envoiInfoTrie(){
-		global $PAGE;
-		$data = $this->get_submitted_data();
-		$url = $PAGE->url . '?';
-		 if($data->recherche != ""){
-		 	$url .= 'search='. $data->recherche;
-		 }else{
-		 	$idCategory = ($data->category == -1) ? NULL : $data->category ;
-		 	$url .= 'categories=' . $idCategory;
-		 }
-		redirect($url);
-	}
 	
 	
 	public function getListeCour(){

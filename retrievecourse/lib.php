@@ -34,9 +34,9 @@ defined('MOODLE_INTERNAL') || die;
  * @param stdClass $context The context of the course
  */
 function report_retrievecourse_extend_navigation_course($navigation, $course, $context) {
-	global $CFG,$PAGE;
+	global $CFG,$PAGE , $USER;
 	$tempCourse = substr($PAGE->course->shortname,-( $CFG->tempYearOne + $CFG->tempYearTwo));
-	if($CFG->visibilite_plugin && $tempCourse == $CFG->temp){
+	if(($CFG->visibilite_plugin && $tempCourse == $CFG->temp) || array_key_exists($USER->id , get_admins())){
 		if (has_capability('report/retrievecourse:view', $context)) {
 			$url = new moodle_url('/report/retrievecourse/index.php', array('id'=>$course->id));
 			$namePlugin = 'Copie '. (substr($CFG->temp,0,$CFG->tempYearOne)+1) .'-'. (substr($CFG->temp,-$CFG->tempYearTwo)+1) .' du cours';

@@ -1,16 +1,7 @@
 <?php
-require_once (__DIR__ . '/../model/ManageDB.php');
 
 class Graphique{
 	
-	/**
-	 * @var ManageDB
-	 */
-	private $db;
-	
-	function construct(){	
-		$this->db = new ManageDB();
-	}
 	/**
 	 * Permet de generer un graphique en camembert.
 	 * @param array $data

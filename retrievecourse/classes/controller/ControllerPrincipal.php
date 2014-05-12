@@ -4,8 +4,11 @@ require_once (__DIR__ . '/../view/FormTeacher.php');
 require_once (__DIR__ . '/ControllerFormTeacher.php');
 require_once (__DIR__ . '/ControllerFormAdmin.php');
 require_once (__DIR__ . '/../model/ManageDB.php');
+require_once (__DIR__ . '/../model/ManageRetrieveCourseDB.php');
+require_once (__DIR__ . '/../model/ManageRetrieveCourseCronDB.php');
 require_once (__DIR__ . '/../view/FormAdmin.php');
 require_once (__DIR__ . '/../model/RetrieveCourseConstante.php');
+require_once (__DIR__ . '/../../outils.php');
 
 /**
  * 
@@ -14,10 +17,14 @@ require_once (__DIR__ . '/../model/RetrieveCourseConstante.php');
  */
 class ControllerPrincipal {
 	/**
-	 * 
 	 * @var ManageDB
 	 */
-	private $db;
+	private $managedb;
+	/**
+	 * 
+	 * @var ManageRetrieveCourseDB
+	 */
+	private $retrievecoursedb;
 	
 	/**
 	 * 
@@ -27,7 +34,8 @@ class ControllerPrincipal {
 	
 	function __construct(){
 		global $USER;
-		$this->db = new ManageDB();
+		$this->managedb = new ManageDB();
+		$this->retrievecoursedb = new ManageRetrieveCourseDB();
 		$this->service = new RetrieveCourseService(null, $USER->id , null);
 	}
 	
@@ -35,12 +43,12 @@ class ControllerPrincipal {
 	 * Verifie que toute les conditions sont rempli pour pouvoir utiliser le plugin.
 	 */
 	public function verification(){
+		$outcome = true;
 		if(!is_siteadmin()){
-			$this->verifierCreationCour();
-			$this->verifierPluginUtilise();
-			$this->checkTeacherOfNextCourse();
+			$outcome = $this->verifierCreationCour() && $this->verifierPluginUtilise() && 
+							$this->checkTeacherOfNextCourse();
 		}
-		
+		return $outcome;
 	}
 	
 	
@@ -82,14 +90,14 @@ class ControllerPrincipal {
 		$confirm = optional_param('confirmation', 0, PARAM_TEXT);
 		$nextShortname =  optional_param('shortname', 0, PARAM_TEXT);
 		if($confirm != NULL && $nextShortname != NULL){
-			if($this->db->checkCourseExist($nextShortname)){
+			if($this->managedb->checkCourseExist($nextShortname)){
 				switch($confirm){
 					case RetrieveCourseConstante::CONFIRMATION_NEW_COURSE : $controllerFormTeacher->choiceNewCourse($nextShortname);break;
 					case RetrieveCourseConstante::CONFIRMATION_BACKUP_TEACHER : $controllerFormTeacher->choiceRetrieve($nextShortname) ; break;
-					default: redirect($PAGE->url);break;
+					default: redirection($PAGE->url);break;
 				}	
 			}else{
-				redirect($PAGE->url);
+				redirection($PAGE->url);
 			}
 		}else{
 			($formTeacher->is_submitted()) ? $controllerFormTeacher->teacher_submit(nextShortname($PAGE->course->shortname))
@@ -104,31 +112,29 @@ class ControllerPrincipal {
 	 */
 	private function verifierCreationCour(){
 		global $PAGE;
+		$outcome = true;
 		$nextShortname = nextShortname($PAGE->course->shortname);
-		if(!$this->db->checkCourseExist($nextShortname)){
-			?>
-<script type="text/javascript" charset="utf-8">
-					alert("Le cour de l'ann\351e prochaine n'a pas encore \351t\351 cr\351e");
-				</script>
-<?php 
-	 		redirect('/course/view.php?id='.$_SESSION['idCourse']);
-	 	}
-	 }
+		if(!$this->managedb->checkCourseExist($nextShortname)){
+			$msg = utf8_encode("Le cour de l'année prochaine n'a pas encore été crée");
+			message($msg);
+			$outcome = false;
+		 }
+		 return $outcome;
+	}
 	
 	/**
 	 * Permet de vérifier si le plugin a déjà été utilisé.
 	 */ 
 	private function verifierPluginUtilise(){
 		global $PAGE;
-		$course_used = $this->db->checkPluginUsed($_SESSION['idCourse']);
+		$outcome = true;
+		$course_used = $this->retrievecoursedb->checkPluginUsed($_SESSION['idCourse']);
 		if($course_used){
-			?>
-<script type="text/javascript" charset="utf-8">
-					alert("Le plugin a d\351j\340 \351t\351 utilis\351.");
-				</script>
-<?php 
-	 		redirect('/course/view.php?id='.$_SESSION['idCourse']);
+			$msg = utf8_encode("Le plugin a déjà été utilisé.");
+			message($msg);
+			$outcome = false;
 		}
+		return $outcome;
 	}
 	
 	/**
@@ -137,16 +143,15 @@ class ControllerPrincipal {
 	 */
 	private function checkTeacherOfNextCourse(){
 		global $PAGE,$DB,$USER;
-		$idCourseNextYear = $this->db->getCourseId(nextShortname($PAGE->course->shortname));
-		$ok = (($idCourseNextYear != NULL) && ($this->db->checkUserEnroledInCourse($idCourseNextYear ,$USER->id)));
+		$outcome = true;
+		$idCourseNextYear = $this->managedb->getCourseId(nextShortname($PAGE->course->shortname));
+		$ok = (($idCourseNextYear != NULL) && ($this->managedb->checkUserEnroledInCourse($idCourseNextYear ,$USER->id)));
 		if(!$ok){
-			?>
-<script type="text/javascript" charset="utf-8">
-					alert("Vous n' \352tes pas le professeur titulaire du cours de l'ann\351e prochaine");
-				</script>
-<?php 
-	 		redirect('/course/view.php?id='.$_SESSION['idCourse']);
+			$msg =utf8_encode("Vous n' êtes pas le professeur titulaire du cours de l'année prochaine");
+			message($msg);
+			$outcome = false;
 		}	
+		return $outcome;
 	}
 	
 	

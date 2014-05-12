@@ -20,33 +20,33 @@ require_once (__DIR__ . '/../model/RetrieveCourseConstante.php');
  */
 class RetrieveCourseService{
 	/** Automated backups are active and ready to run */
-	const STATE_OK = 0;
+// 	const STATE_OK = 0;
 	/** Automated backups are disabled and will not be run */
-	const STATE_DISABLED = 1;
+// 	const STATE_DISABLED = 1;
 	/** Automated backups are all ready running! */
-	const STATE_RUNNING = 2;
+// 	const STATE_RUNNING = 2;
 	
 	/** Course automated backup completed successfully */
 	const BACKUP_STATUS_OK = 1;
 	/** Course automated backup errored */
 	const BACKUP_STATUS_ERROR = 0;
 	/** Course automated backup never finished */
-	const BACKUP_STATUS_UNFINISHED = 2;
+// 	const BACKUP_STATUS_UNFINISHED = 2;
 	/** Course automated backup was skipped */
-	const BACKUP_STATUS_SKIPPED = 3;
+// 	const BACKUP_STATUS_SKIPPED = 3;
 	/** Course automated backup had warnings */
 	const BACKUP_STATUS_WARNING = 4;
 	/** Course automated backup has yet to be run */
-	const BACKUP_STATUS_NOTYETRUN = 5;
+// 	const BACKUP_STATUS_NOTYETRUN = 5;
 	
 	/** Run if required by the schedule set in config. Default. **/
-	const RUN_ON_SCHEDULE = 0;
+// 	const RUN_ON_SCHEDULE = 0;
 	/** Run immediately. **/
-	const RUN_IMMEDIATELY = 1;
+// 	const RUN_IMMEDIATELY = 1;
 	
-	const AUTO_BACKUP_DISABLED = 0;
-	const AUTO_BACKUP_ENABLED = 1;
-	const AUTO_BACKUP_MANUAL = 2;
+// 	const AUTO_BACKUP_DISABLED = 0;
+// 	const AUTO_BACKUP_ENABLED = 1;
+// 	const AUTO_BACKUP_MANUAL = 2;
 	/**
 	 * Id du cours courant.
 	 * @var int
@@ -119,8 +119,7 @@ class RetrieveCourseService{
 	public function runService(){
 		global $OUTPUT;
 		if($this->course != NULL && $this->nextShortname != NULL && $this->user != NULL){
-			//$this->backup();
-			$this->launch_automated_backup($this->course, time(), $this->user);
+			$this->backup();
 			$this->restore();
 		}else{
 			echo utf8_encode("Erreur!!!
@@ -128,37 +127,6 @@ class RetrieveCourseService{
 			echo $OUTPUT->continue_button('../..');
 		}
 	
-	}
-	
-	private function backup(){
-		global $CFG;
-		if($this->flagcron == RetrieveCourseConstante::USE_BACKUP_IMMEDIATELLY){
-			echo "<script>";
-			echo "document.getElementById('progress_bar_course').innerHTML='Backup du cour : ".$this->db->getShortnameCourse($this->course)."';";
-			echo "</script>";
-		}
-		
-		$bc = new backup_controller(backup::TYPE_1COURSE, $this->course, backup::FORMAT_MOODLE,
-				backup::INTERACTIVE_NO, backup::MODE_GENERAL, $this->user);
-		
-		$backup = new import_ui($bc);
-		// Process the current stage
-		$backup->process();
-		
-		$logger = new WebCTServiceLogger($CFG->debugdeveloper ? backup::LOG_DEBUG : backup::LOG_INFO);
-	    $progress = new WebCTServiceProgress($logger,$this->flagcron,$this->currentProgress,$this->step);
-	    $progress->start_progress('', 1);
-		$backup->get_controller()->set_progress($progress);
-		$backup->get_controller()->add_logger($logger);
-		
-		$bc->finish_ui();
-		$bc->execute_plan();	
-		$bc_results = $bc->get_results();
-		
-		$this->folder = $bc->get_backupid();
-		
-		
-		$this->currentProgress = $progress->getProgress();	
 	}
 	
 	  /**
@@ -169,8 +137,9 @@ class RetrieveCourseService{
      * @param int $userid
      * @return bool
      */
-    private  function launch_automated_backup($course, $starttime, $userid) {
+    private  function backup() {
     	global $CFG;
+    
     	if($this->flagcron == RetrieveCourseConstante::USE_BACKUP_IMMEDIATELLY){
     		echo "<script>";
     		echo "document.getElementById('progress_bar_course').innerHTML='Backup du cour : ".$this->db->getShortnameCourse($this->course)."';";
@@ -181,9 +150,9 @@ class RetrieveCourseService{
         $dir = $config->backup_auto_destination;
         $storage = (int)$config->backup_auto_storage;
 	
-		
-        $bc = new backup_controller(backup::TYPE_1COURSE, $course, backup::FORMAT_MOODLE, backup::INTERACTIVE_NO,
-                backup::MODE_AUTOMATED, $userid);
+		$admin = get_admin();
+        $bc = new backup_controller(backup::TYPE_1COURSE, $this->course, backup::FORMAT_MOODLE, backup::INTERACTIVE_NO,
+                backup::MODE_AUTOMATED, $admin->id);
         
         $backup = new import_ui($bc);
         // Process the current stage
@@ -238,7 +207,7 @@ class RetrieveCourseService{
             }
             // Copy file only if there was no error.
             if ($file && !empty($dir) && $storage !== 0 && $outcome != self::BACKUP_STATUS_ERROR) {
-                $filename = backup_plan_dbops::get_default_backup_filename($format, $type, $course, $users, $anonymised,
+                $filename = backup_plan_dbops::get_default_backup_filename($format, $type, $this->course, $users, $anonymised,
                         !$config->backup_shortname);
                 if (!$file->copy_content_to($dir.'/'.$filename)) {
                     $outcome = self::BACKUP_STATUS_ERROR;
@@ -249,7 +218,7 @@ class RetrieveCourseService{
             }
 
         } catch (moodle_exception $e) {
-            $bc->log('backup_auto_failed_on_course', backup::LOG_ERROR, $this->db->getShortnameCourse($course)); // Log error header.
+            $bc->log('backup_auto_failed_on_course', backup::LOG_ERROR, $this->db->getShortnameCourse($this->course)); // Log error header.
             $bc->log('Exception: ' . $e->errorcode, backup::LOG_ERROR, $e->a, 1); // Log original exception problem.
             $bc->log('Debug: ' . $e->debuginfo, backup::LOG_DEBUG, null, 1); // Log original debug information.
             $outcome = self::BACKUP_STATUS_ERROR;
@@ -412,11 +381,9 @@ class WebCTServiceProgress extends core_backup_progress {
 	protected $step;
 	
 	private $progress;
-	/**
-	 * 
-	 * @var ManageDb
-	 */
-	private $db;
+	
+	
+	private $crondb;
 	/**
 	 * Permettra de savoir si le backup est immédiat ou s'il est fait à l'aide de cron.
 	 * @var int
@@ -430,7 +397,7 @@ class WebCTServiceProgress extends core_backup_progress {
 		
 		$this->step = $step;
 		
-		$this->db = new ManageDB();
+		$this->crondb = new ManageRetrieveCourseCronDB();
 		
 		$this->flagcron = $flagcron;
 	}
@@ -445,10 +412,10 @@ class WebCTServiceProgress extends core_backup_progress {
 			$range = $this->get_progress_proportion_range();
 		
 			if($this->flagcron == RetrieveCourseConstante::USE_CRON){
-				$idCron = $this->db->getIdCronRunning();
+				$idCron = $this->crondb->getIdCronRunning();
 				//idCron vaut NULL dans le cas où aucun cours n'est en cours de backup/restore avec cron.
 				if($idCron != NULL){
-					$this->db->updateTimeModifiedCron( $idCron , time());
+					$this->crondb->updateTimeModifiedCron( $idCron , time());
 				}
 			}
 			

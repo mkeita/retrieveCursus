@@ -15,12 +15,12 @@ $PAGE->requires->jquery_plugin('ui-css');
 
 headerRetrieveCursus();
 
-// $admin = get_admins();
-// var_dump($admin);
-
 $controller = new ControllerPrincipal();
-$controller->verification();
-$controller->display();
+$verification = $controller->verification();
+if($verification){
+	$controller->display();
+}
+
 
 echo $OUTPUT->footer();
 
@@ -30,9 +30,7 @@ function headerRetrieveCursus(){
 	global $PAGE , $OUTPUT,$CFG ;
 	
 	$id   = optional_param('id', 0, PARAM_INT);// Course ID
-	
-	
-	
+
 	if($id != NULL){
 		$_SESSION['idCourse'] = $id;
 	}
@@ -46,6 +44,8 @@ function headerRetrieveCursus(){
 	$namePlugin = 'Copie '. (substr($CFG->temp,0,$CFG->tempYearOne)+1) .'-'. (substr($CFG->temp,-$CFG->tempYearTwo)+1) .' du cours';
 	$PAGE->set_title( $namePlugin);
 	$PAGE->set_heading($namePlugin );
+	$search = optional_param('search', '', PARAM_TEXT);
+	$category = optional_param('categories', '', PARAM_TEXT);
 	$PAGE->set_url('/report/retrievecourse/index.php');
 	echo $OUTPUT->header();
 }
