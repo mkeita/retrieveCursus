@@ -118,7 +118,6 @@ class ManageRetrieveCourseCronDB extends ManageDB{
 		global $DB;
 		$param = array('id'=> $id);
 		$result = $DB->get_records_sql('SELECT id,time_modified FROM mdl_retrievecourse_cron WHERE id = :id',$param);
-		var_dump($result);
 		($result == NULL) ? NULL : $result[$id]->time_modified ;
 	}
 	

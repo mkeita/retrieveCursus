@@ -56,6 +56,7 @@ class FormAdmin extends moodleform{
 	private function initialiserListeCour(){
 		$search = optional_param('search', '', PARAM_TEXT);
 		$category = optional_param('categories', NULL, PARAM_TEXT);
+		if($category == '') $category = NULL;
 		if($search != NULL){
 			$this->listeCour = $this->retrievecoursedb->searchCourseNotUsedPlugin($search);
 		}else{
@@ -100,8 +101,8 @@ class FormAdmin extends moodleform{
 		);
 		
 		$arrayUsedPlugin = array(
-				'Courses that used </br>the plugin' => $graphDB->getNbCourUsedPlugin(),
-				'Courses that doesn\'t </br>use the plugin' => $graphDB->getNbCourNotUsedPlugin()
+				get_string('used_plugin','report_retrievecourse') => $graphDB->getNbCourUsedPlugin(),
+				get_string('not_used_plugin','report_retrievecourse') => $graphDB->getNbCourNotUsedPlugin()
 		);
 		
 		if($arrayAdmin['admin backup'] != 0   || $arrayAdmin['admin cron'] != 0  ){

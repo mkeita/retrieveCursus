@@ -1,5 +1,4 @@
 <?php
-
 require('../../config.php');
 require_once($CFG->dirroot.'/course/lib.php');
 require_once ($CFG->libdir.'/accesslib.php');
@@ -8,22 +7,36 @@ require_once (__DIR__ . '/outils.php');
 
 defined('MOODLE_INTERNAL') || die;
 
+
+
 $PAGE->requires->jquery();
 $PAGE->requires->jquery_plugin('ui');
 $PAGE->requires->jquery_plugin('ui-css');
 
+
+
 echo '<link rel="stylesheet" href="lib/DataTables-1.9.4/media/css/jquery.dataTables.css" type="text/css"> ';
 
-headerRetrieveCourse();
+
+$idElemDelete = optional_param("id", NULL, PARAM_INT);
+
+if(isset($idElemDelete) && $idElemDelete != NULL){
+	$idcourse = required_param("idcourse",PARAM_INT);
+	$DB->delete_records('retrievecourse', array('id'=>$idElemDelete)); 
+	$DB->delete_records('retrievecourse_cron',array('courseid'=>$idcourse));
+}
 
 $retrievecoursedb = new ManageRetrieveCourseDB();
 $data = $retrievecoursedb->getRetrieveCourse();
 $nameColumn = $retrievecoursedb->retrieveNameColumn();
 
+headerRetrieveCourse();
+
 if($data == NULL){
 	$msg =  utf8_encode('Le plugin n\'a pas encore été utilisé!');
 	message($msg);
 }else{
+	
 	echo '<table id="tableRetrieveCourse">';
 	echo '<thead>';
 	echo '<tr>';
@@ -46,7 +59,11 @@ if($data == NULL){
 			}
 				
 		}
-		$img = '<img src="/img/ico_remove.jpg"  />';
+		$idImg = $object->id;
+		$url = 'http://localhost/report/retrievecourse/viewRetrieveCourseLogs.php?id=' .$idImg .'&idcourse='.$object->courseid_old ;
+		$img = '<a href="'.$url .'"> <img src="img/ico_remove.jpg" id="'.$idImg.'" /></a>';
+		
+		
 		echo '<td> ' . $img  . '</td>';
 		echo '</tr>';
 	}
@@ -62,6 +79,7 @@ $(document).ready(function() {
 
 
 echo $OUTPUT->footer();
+
 die();
 
 

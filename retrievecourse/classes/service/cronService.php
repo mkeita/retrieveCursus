@@ -30,6 +30,7 @@ class cronService {
 	public function launchBackupRestore(){
 		$listeCron = $this->crondb->retrieveCron();
 		foreach($listeCron as $cron){
+			initialize_php_ini();
 			if(!$this->verifierPlageHoraire()){
 				break;
 			}
@@ -41,38 +42,38 @@ class cronService {
 				$this->service->runService();
 				$this->crondb->deleteCron($cron->id);
 				$this->crondb->cronFinish($cron->id, $cron->courseid);
-				$this->send_email($cron->user , $cron->shortname_course_new  );
+			//	$this->send_email($cron->user , $cron->shortname_course_new  );
 			}
 		} 
 	}
 	
-	private function send_email($userid , $shortname){
-		global $DB;
+// 	private function send_email($userid , $shortname){
+// 		global $DB;
 	
-		$message = 'Bonjour, </br> </br>';
-		$message .= $shortname . ' disponible';
+// 		$message = 'Bonjour, </br> </br>';
+// 		$message .= $shortname . ' disponible';
 	
-		$userto = $DB->get_record('user', array("id"=>$userid));
+// 		$userto = $DB->get_record('user', array("id"=>$userid));
 	
-		$admin = get_admin();
-		$admin->priority = 1;
+// 		$admin = get_admin();
+// 		$admin->priority = 1;
 	
-		//Send the message
-		$eventdata = new stdClass();
-		$eventdata->modulename        = 'moodle';
-		$eventdata->userfrom          = $admin;
-		$eventdata->userto            = $userto;
-		$eventdata->subject           = utf8_encode('Récupération des informations dans le cours ' . $shortname);
-		$eventdata->fullmessage       = $message;
-		$eventdata->fullmessageformat = FORMAT_PLAIN;
-		$eventdata->fullmessagehtml   = '';
-		$eventdata->smallmessage      = '';
-		$eventdata->component         = 'moodle';
-		$eventdata->name         = 'backup';
-		$eventdata->notification = 1;
-		message_send($eventdata);
+// 		//Send the message
+// 		$eventdata = new stdClass();
+// 		$eventdata->modulename        = 'moodle';
+// 		$eventdata->userfrom          = $admin;
+// 		$eventdata->userto            = $userto;
+// 		$eventdata->subject           = utf8_encode('Récupération des informations dans le cours ' . $shortname);
+// 		$eventdata->fullmessage       = $message;
+// 		$eventdata->fullmessageformat = FORMAT_PLAIN;
+// 		$eventdata->fullmessagehtml   = '';
+// 		$eventdata->smallmessage      = '';
+// 		$eventdata->component         = 'moodle';
+// 		$eventdata->name         = 'backup';
+// 		$eventdata->notification = 1;
+// 		message_send($eventdata);
 	
-	}
+// 	}
 	
 	private function initialiserService( $idCourse , $userid , $nextShortname){
 		$this->service->setCourse($idCourse);

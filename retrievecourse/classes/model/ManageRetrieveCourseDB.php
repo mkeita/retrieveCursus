@@ -1,6 +1,7 @@
 <?php
 
 require_once (__DIR__ . '/ManageDB.php');
+require_once (__DIR__ . '/../../outils.php');
 
 class ManageRetrieveCourseDB extends ManageDB {
 	
@@ -84,6 +85,7 @@ class ManageRetrieveCourseDB extends ManageDB {
 	 */
 	public function courseNotUsedPugin($idCagtegorie=null){
 		global $DB,$CFG;
+		$manage = new ManageDB();
 		$listeCours = array('-1'=>'All			');
 		$cond = ($idCagtegorie == null) ? '' : ' and category =' . $idCagtegorie;
 		$result = $DB->get_records_sql('SELECT mdl_course.id,mdl_course.shortname FROM mdl_course
@@ -93,7 +95,9 @@ class ManageRetrieveCourseDB extends ManageDB {
 	
 		foreach ($result as $value){
 			$temp = substr($value->shortname, -$tempSize);
-			if($temp == $CFG->temp){
+			$nextshortname = nextShortname($value->shortname);
+			if($temp == $CFG->temp && $manage->checkCourseExist($nextshortname)){
+				
 				$listeCours[$value->id] = $value->shortname;
 			}
 		}
@@ -107,17 +111,19 @@ class ManageRetrieveCourseDB extends ManageDB {
 	 */
 	public function searchCourseNotUsedPlugin($search){
 		global $DB,$CFG;
+		$manage = new ManageDB();
 		$listeCours = array('-1'=>'All			');
 		$param = array('search'=> "%$search%");
 		$result = $DB->get_records_sql('SELECT mdl_course.id,mdl_course.shortname FROM mdl_course
 				WHERE mdl_course.id NOT IN (SELECT mdl_retrievecourse.courseid_old FROM mdl_retrievecourse)
 				   and mdl_course.shortname LIKE :search ' , $param);
 		foreach ($result as $value){
-			//TODO Temp config
 			$tempSize = $CFG->tempYearOne + $CFG->tempYearTwo;
 			$temp = substr($value->shortname, -$tempSize);
-			//TODO Recuperer des config '201314'
-			if($temp == $CFG->temp){
+			
+			$nextshortname = nextShortname($value->shortname);
+			
+			if($temp == $CFG->temp && $manage->checkCourseExist($nextshortname) ){
 				$listeCours[$value->id] = $value->shortname;
 			}
 		}

@@ -27,11 +27,7 @@
 defined('MOODLE_INTERNAL') || die;
 // just a link to course report
 
-
 $ADMIN->add('reports', new admin_category('retrieveCourse', 'Retrieve Course'));
-
-//$namePlugin = 'Copie '. (substr($CFG->temp,0,$CFG->tempYearOne)+1) .'-'. (substr($CFG->temp,-$CFG->tempYearTwo)+1) .' du cours';
-//$CFG->namePlugin = $namePlugin;
 
 $ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecourse', 'Retrieve Course', "$CFG->wwwroot/report/retrievecourse/index.php", 'report/log:view'));
 
@@ -41,17 +37,9 @@ $ADMIN->add('retrieveCourse', new admin_externalpage('reportretrievecourselogs',
 
 $settings = null;
 
-
-// Create a page for automated backups configuration and defaults.
 $temp = new admin_settingpage('retrievecourse_settings', get_string('retrievecourse_config','report_retrievecourse'));
 
 $temp->add( new admin_setting_configcheckbox('visibilite_plugin', 'visibilite_plugin', '', 1));
-
-// $CFG->tempSize = $CFG->tempYearOne + $CFG->tempYearTwo;
-// var_dump($CFG->tempSize);
-
-// $temp->add(new admin_setting_configtext('namePlugin', 'Nom du plugin',
-// 		get_string('retrievecourse_description', 'report_retrievecourse'), $namePlugin, PARAM_TEXT));
 
 $temp->add(new admin_setting_configtext('tempYearOne', get_string('tempYearOne', 'report_retrievecourse'),
 		get_string('retrievecourse_description', 'report_retrievecourse'), 4, PARAM_INT));
@@ -59,28 +47,52 @@ $temp->add(new admin_setting_configtext('tempYearOne', get_string('tempYearOne',
 $temp->add(new admin_setting_configtext('tempYearTwo', get_string('tempYearTwo', 'report_retrievecourse'),
 		get_string('retrievecourse_description', 'report_retrievecourse'), 2, PARAM_INT));
 
+$yearOne = -4;
+$yearTwo = -2;
 
-// $choice1 = (substr((date('Y')-2), -$CFG->tempYearOne) . substr((date('Y')-1), -$CFG->tempYearTwo) );
-// $choice2 = substr((date('Y')-1), -$CFG->tempYearOne) .substr(date('Y'), -$CFG->tempYearTwo);
-// $choice3 = substr((date('Y')), -$CFG->tempYearOne) .substr((date('Y')+1), -$CFG->tempYearTwo);
-// $choice4 =  substr((date('Y')+1), -$CFG->tempYearOne) .substr((date('Y')+2), -$CFG->tempYearTwo);
+if(isset($CFG->tempYearOne) && isset($CFG->tempYearTwo)){
+	if($CFG->tempYearOne != NULL && $CFG->tempYearTwo != NULL){
+		$yearOne = -$CFG->tempYearOne;
+		$yearTwo = -$CFG->tempYearTwo;
+	}
+}
 
+$choice1 = (substr((date('Y')-2), $yearOne) . substr((date('Y')-1), $yearTwo) );
+$choice2 = substr((date('Y')-1), $yearOne) .substr(date('Y'), $yearTwo);
+$choice3 = substr((date('Y')), $yearOne) .substr((date('Y')+1), $yearTwo);
+$choice4 =  substr((date('Y')+1), $yearOne) .substr((date('Y')+2), $yearTwo);
 
 $choices = array(
-	'201314' => '201314',
-	'201415' => '201415' ,
-	'201516' => '201516' ,
-	'201617' => '201617'
+		$choice1 => $choice1,
+		$choice2 => $choice2,
+		$choice3 => $choice3,
+		$choice4 => $choice4,
 );
 
-$temp->add(new admin_setting_configselect('temp', 'Valeur du temp', '','201314', $choices));
+$temp->add(new admin_setting_configselect('temp', 'Valeur du temp', '',$choice2, $choices));
 
 $temp->add(new admin_setting_configtime('cron_heure_debut', 'cron_minute_debut', 'Heure debut', '', array('h'=>18,'m'=>30)));
 $temp->add(new admin_setting_configtime('cron_heure_fin', 'cron_minute_fin', 'Heure fin', '', array('h'=>6,'m'=>30)));
 
+
+
 $temp->add(new admin_setting_configtext('nbTentativeMax', get_string('nbTentativeMax', 'report_retrievecourse'),
 		get_string('retrievecourse_description', 'report_retrievecourse'), 2, PARAM_INT));
 
+$temp->add(new admin_setting_configtext('post_max_size', get_string('post_max_size', 'report_retrievecourse'),
+		get_string('retrievecourse_description', 'report_retrievecourse'), "40G", PARAM_ALPHANUM));
+
+$temp->add(new admin_setting_configtext('memory_limit', get_string('memory_limit', 'report_retrievecourse'),
+		get_string('retrievecourse_description', 'report_retrievecourse'), "-1", PARAM_ALPHANUMEXT));
+
+$temp->add(new admin_setting_configtext('upload_max_filesize', get_string('upload_max_filesize', 'report_retrievecourse'),
+		get_string('retrievecourse_description', 'report_retrievecourse'), "40G", PARAM_ALPHANUMEXT));
+
+$temp->add(new admin_setting_configtext('max_execution_time', get_string('max_execution_time', 'report_retrievecourse'),
+		get_string('retrievecourse_description', 'report_retrievecourse'), "0", PARAM_INT));
+
+$temp->add(new admin_setting_configtext('max_input_time', get_string('max_input_time', 'report_retrievecourse'),
+		get_string('retrievecourse_description', 'report_retrievecourse'), "0", PARAM_INT));
 
 $ADMIN->add('retrieveCourse', $temp);
 

@@ -22,9 +22,11 @@ if($verification){
 }
 
 
+
 echo $OUTPUT->footer();
 
 die();
+
 
 function headerRetrieveCursus(){
 	global $PAGE , $OUTPUT,$CFG ;

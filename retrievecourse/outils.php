@@ -8,13 +8,44 @@ function redirection($url){
 	echo '</script>';
 }
 
+/**
+ * Permet d'initialiser certaine variable du fichier php.ini
+ */
+function initialize_php_ini(){
+	global $CFG;
+	@ignore_user_abort(true);
+	@set_time_limit(0);
+	raise_memory_limit(MEMORY_HUGE);
+	
+	if(!isset($CFG->memory_limit) || $CFG->memory_limit != NULL){
+		ini_set("memory_limit",$CFG->memory_limit);
+	}else{
+		ini_set("memory_limit","-1");
+	}
+
+	ini_set("post_max_size",$CFG->post_max_size);
+	ini_set("upload_max_filesize",$CFG->upload_max_filesize);
+	ini_set("max_execution_time",$CFG->max_execution_time);
+	ini_set("max_input_time",$CFG->max_input_time);
+	
+	
+// 	echo 'post_max_size = ' . ini_get('post_max_size') . "</br>";
+// 	echo 'upload_max_filesize = ' . ini_get('upload_max_filesize') . "</br>";
+// 	echo 'memory_limit = ' . ini_get('memory_limit') . "</br>";
+// 	echo 'max_execution_time = ' . ini_get('max_execution_time') . "</br>";
+// 	echo 'max_input_time = ' . ini_get('max_input_time') . "</br>";
+}
+
 function message($msg , $url = '../..'){
 	global $OUTPUT;
 	?>
 		<div id="message"
 		style="width: 60%; margin-left: auto; margin-right: auto; border-width: 1px; border-style: solid; background-color: #00000; border-color: #BBB; text-align: left">
 					<?php echo $msg . '</br></br></br>';
-					echo $OUTPUT->continue_button($url);
+					if($url != null){
+						echo $OUTPUT->continue_button($url);
+					}
+					
 					?>
 		</div>
 	<?php 

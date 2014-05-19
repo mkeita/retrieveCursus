@@ -55,6 +55,7 @@ function report_retrievecourse_cron() {
 	
 	$cronService = new cronService();
 	
+	
 	if($cronService->checkLaunchBackupRestore()){
 		mtrace("launch");
 		$cronService->launchBackupRestore();

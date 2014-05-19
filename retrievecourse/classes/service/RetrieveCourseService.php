@@ -5,6 +5,7 @@ global $CFG;
 
 
 //require('../../config.php');
+require_once($CFG->dirroot.'/enrol/locallib.php');
 require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
 require_once($CFG->dirroot . '/backup/moodle2/backup_plan_builder.class.php');
@@ -85,6 +86,8 @@ class RetrieveCourseService{
 	
 	private $contenthash;
 	
+	private $teachers;
+	
 
 	
 	public $currentProgress = 0;
@@ -118,9 +121,12 @@ class RetrieveCourseService{
 	 */
 	public function runService(){
 		global $OUTPUT;
+		
 		if($this->course != NULL && $this->nextShortname != NULL && $this->user != NULL){
+			
 			$this->backup();
 			$this->restore();
+			$this->send_email($this->user, $this->nextShortname);
 		}else{
 			echo utf8_encode("Erreur!!!
 					Veuillez vérifier que le cours " . $this->nextShortname . " existe!!!!");
@@ -139,11 +145,20 @@ class RetrieveCourseService{
      */
     private  function backup() {
     	global $CFG;
-    
+    	initialize_php_ini();
+    	
     	if($this->flagcron == RetrieveCourseConstante::USE_BACKUP_IMMEDIATELLY){
+    		echo '</br> </br>';
+    		message(utf8_encode("<b> Même si le navigateur s'arrête de fonctionner, </br> 
+    				le backup/restore continue de s'exécuter en background. </br>
+    				Vous serez prévenu de la fin du backup/restore par email.</b>"),null);
+    		
     		echo "<script>";
     		echo "document.getElementById('progress_bar_course').innerHTML='Backup du cour : ".$this->db->getShortnameCourse($this->course)."';";
     		echo "</script>";
+    		
+    		
+    		
     	}
         $outcome = self::BACKUP_STATUS_OK;
         $config = get_config('backup');
@@ -151,6 +166,12 @@ class RetrieveCourseService{
         $storage = (int)$config->backup_auto_storage;
 	
 		$admin = get_admin();
+		
+		$courseNextShortname = $this->db->getCourseId($this->nextShortname);
+		$context_id = $this->db->getContextid($courseNextShortname);
+		$context = get_context_instance_by_id($context_id);
+		$this->teachers = get_role_users(3, $context);
+		
         $bc = new backup_controller(backup::TYPE_1COURSE, $this->course, backup::FORMAT_MOODLE, backup::INTERACTIVE_NO,
                 backup::MODE_AUTOMATED, $admin->id);
         
@@ -165,9 +186,8 @@ class RetrieveCourseService{
         $backup->get_controller()->add_logger($logger);
 
         try {
-
             $settings = array(
-                'users' => 'backup_auto_users',
+			    'users' => 'backup_auto_users',
                 'role_assignments' => 'backup_auto_role_assignments',
                 'activities' => 'backup_auto_activities',
                 'blocks' => 'backup_auto_blocks',
@@ -179,6 +199,7 @@ class RetrieveCourseService{
                 'histories' => 'backup_auto_histories',
                 'questionbank' => 'backup_auto_questionbank'
             );
+            
             foreach ($settings as $setting => $configsetting) {
                 if ($bc->get_plan()->setting_exists($setting)) {
                     if (isset($config->{$configsetting})) {
@@ -191,6 +212,7 @@ class RetrieveCourseService{
             $format = $bc->get_format();
             $type = $bc->get_type();
             $id = $bc->get_id();
+            $bc->get_plan()->get_setting('users')->set_value('0');
             $users = $bc->get_plan()->get_setting('users')->get_value();
             $anonymised = $bc->get_plan()->get_setting('anonymize')->get_value();
             $bc->get_plan()->get_setting('filename')->set_value(backup_plan_dbops::get_default_backup_filename($format, $type,
@@ -275,10 +297,38 @@ class RetrieveCourseService{
     	}
     	return $outcome;
     }
+    private function send_email($userid , $shortname){
+    	global $DB;
     
+    	$message = 'Bonjour, </br> </br>';
+    	$message .= $shortname . ' disponible';
+    
+    	$userto = $DB->get_record('user', array("id"=>$userid));
+    
+    	$admin = get_admin();
+    	$admin->priority = 1;
+    
+    	//Send the message
+    	$eventdata = new stdClass();
+    	$eventdata->modulename        = 'moodle';
+    	$eventdata->userfrom          = $admin;
+    	$eventdata->userto            = $userto;
+    	$eventdata->subject           = utf8_encode('Récupération des informations dans le cours ' . $shortname);
+    	$eventdata->fullmessage       = $message;
+    	$eventdata->fullmessageformat = FORMAT_PLAIN;
+    	$eventdata->fullmessagehtml   = '';
+    	$eventdata->smallmessage      = '';
+    	$eventdata->component         = 'moodle';
+    	$eventdata->name         = 'backup';
+    	$eventdata->notification = 1;
+    	message_send($eventdata);
+    
+    }
     
 	private function restore(){
 		global $DB,$CFG,$USER;
+		initialize_php_ini();
+		
 		if($this->folder != NULL){
 			if($this->flagcron == RetrieveCourseConstante::USE_BACKUP_IMMEDIATELLY){
 				echo "<script>";
@@ -291,7 +341,7 @@ class RetrieveCourseService{
 				$transaction = $DB->start_delegated_transaction();
 				$options = array();
 				//TODO Probleme des étudiant recupéré
-				$options['keep_roles_and_enrolments'] = 1;
+				$options['keep_roles_and_enrolments'] = 0;
 				$options['keep_groups_and_groupings'] = 0;
 				restore_dbops::delete_course_content($courseId, $options);
 				$transaction->allow_commit();				
@@ -311,13 +361,17 @@ class RetrieveCourseService{
 				$outcome = $this->extract_file_to_dir($storedfile , $contextid);
 				//Récupére filepath
 				$controller = new restore_controller($this->filepath, $courseId, backup::INTERACTIVE_NO,
-						backup::MODE_GENERAL, $USER->id, backup::TARGET_EXISTING_DELETING,$progress);
+						backup::MODE_GENERAL, get_admin()->id , backup::TARGET_EXISTING_DELETING,$progress);
 			
 				$controller->add_logger($logger);
 				
 				$controller->execute_precheck();
 				$controller->execute_plan();
 				$controller->destroy();
+				
+				$this->enrol_teachers();
+
+				
 				$transaction->allow_commit();
 			}else{
 				die(utf8_encode("Le cours " . $this->nextShortname . " n'a pas été trouvé dans la base de donnée!!"));
@@ -327,6 +381,30 @@ class RetrieveCourseService{
 		
 	}
 
+	
+	private function enrol_teachers(){
+		global $PAGE,$DB;
+		$id_course = $this->db->getCourseId($this->nextShortname);
+		$course = get_course($id_course);
+		$manager = new course_enrolment_manager($PAGE, $course);
+		$roleid = 3;
+		foreach ($this->teachers as $teacher){
+			$enrolid = $DB->get_record('enrol', array('enrol'=>"manual","courseid"=>$id_course), 'id', MUST_EXIST);
+			$user = $DB->get_record('user', array('id'=>$teacher->id), '*', MUST_EXIST);
+			$instances = $manager->get_enrolment_instances();
+			$plugins = $manager->get_enrolment_plugins(true); // Do not allow actions on disabled plugins.
+			if (!array_key_exists($enrolid->id, $instances)) {
+				throw new enrol_ajax_exception('invalidenrolinstance');
+			}
+			$instance = $instances[$enrolid->id];
+			if (!isset($plugins[$instance->enrol])) {
+				throw new enrol_ajax_exception('enrolnotpermitted');
+			}
+			$plugin = $plugins[$instance->enrol];
+			$plugin->enrol_user($instance, $user->id, $roleid);
+		}
+	}
+	
 	/**
 	 * Extracts the file.
 	 *
@@ -382,6 +460,11 @@ class WebCTServiceProgress extends core_backup_progress {
 	
 	private $progress;
 	
+	/**
+	 * @var int The number of seconds that can pass without progress() calls.
+	 */
+	const TIME_LIMIT_WITHOUT_PROGRESS = 0;
+	
 	
 	private $crondb;
 	/**
@@ -400,6 +483,7 @@ class WebCTServiceProgress extends core_backup_progress {
 		$this->crondb = new ManageRetrieveCourseCronDB();
 		
 		$this->flagcron = $flagcron;
+	
 	}
 	
 	public function getProgress(){
@@ -434,4 +518,65 @@ class WebCTServiceProgress extends core_backup_progress {
 			
 		}
 	}
+	
+	/**
+	 * Indicates that progress has occurred.
+	 *
+	 * The progress value should indicate the total progress so far, from 0
+	 * to the value supplied for $max (inclusive) in start_progress.
+	 *
+	 * You do not need to call this function for every value. It is OK to skip
+	 * values. It is also OK to call this function as often as desired; it
+	 * doesn't do anything if called more than once per second.
+	 *
+	 * It must be INDETERMINATE if start_progress was called with $max set to
+	 * INDETERMINATE. Otherwise it must not be indeterminate.
+	 *
+	 * @param int $progress Progress so far
+	 * @throws coding_exception If progress value is invalid
+	 */
+	public function progress($progress = self::INDETERMINATE) {
+		// Ignore too-frequent progress calls (more than once per second).
+		$now = $this->get_time();
+		if ($now === $this->lastprogresstime) {
+			return;
+		}
+	
+		// Check we are inside a progress section.
+		$max = end($this->maxes);
+		if ($max === false) {
+			throw new coding_exception(
+					'progress() without start_progress');
+		}
+	
+		// Check and apply new progress.
+		if ($progress === self::INDETERMINATE) {
+			// Indeterminate progress.
+			if ($max !== self::INDETERMINATE) {
+				throw new coding_exception(
+						'progress() INDETERMINATE, expecting value');
+			}
+		} else {
+			// Determinate progress.
+			$current = end($this->currents);
+			if ($max === self::INDETERMINATE) {
+				throw new coding_exception(
+						'progress() with value, expecting INDETERMINATE');
+			} else if ($progress < 0 || $progress > $max) {
+				throw new coding_exception(
+						'progress() value out of range');
+			} else if ($progress < $current) {
+				throw new coding_Exception(
+						'progress() value may not go backwards');
+			}
+			$this->currents[key($this->currents)] = $progress;
+		}
+	
+		// Update progress.
+		$this->count++;
+		$this->lastprogresstime = $now;
+		set_time_limit(self::TIME_LIMIT_WITHOUT_PROGRESS);
+		$this->update_progress();
+	}
+	
 }

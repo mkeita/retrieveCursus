@@ -93,8 +93,16 @@ class ControllerFormAdmin {
 	 */
 	public function backup_immediat($courJson){
 		global $USER,$PAGE,$CFG,$OUTPUT;
+		
 		if(isset($courJson)){
-			echo '<div id="conteneur" style="display:block; background-color:transparent; width:80%;  border:1px solid #000000;">
+			$cour = json_decode($courJson);
+			
+			$this->supprimerCourUsedPlugin($cour);
+			
+			if(count($cour) == 0){
+				message(utf8_encode("Ce cours a déjà fait le backup et le restore"));
+			}else{
+				echo '<div id="conteneur" style="display:block; background-color:transparent; width:80%;  border:1px solid #000000;">
 					<div id="barre" style="display:block; background-color:rgba(132, 232, 104, 0.7); width:0%; height:10%;float:top;clear : top ;clear:both">
 						<div id="pourcentage" style="text-align:right; height:100%; font-size:1.8em;">
 							&nbsp;
@@ -103,33 +111,43 @@ class ControllerFormAdmin {
 				</div>
 				<label id="progress_bar_description"></label></br>
 				<label id="progress_bar_course"></label>';
-	
-			$cour = json_decode($courJson);
-			if($cour[0] == -1){
-				unset($cour[0]);
-			}
-			var_dump($cour);
-			$indice = 0;
-			//BAckup/restore pour un cour
-			$nbElemRestore = count($cour) * 2 ;
-			$this->service->step =1/($nbElemRestore);
-			var_dump($this->service->step);
-			foreach ($cour as $idCourse){
-				$shortname =  $this->db->getShortnameCourse($idCourse);
-				$nextShortname = nextShortname($shortname);
-				progression($indice);
-				$this->service->currentProgress = $indice;
-				if($shortname != NULL){
-					$this->service->setCourse($idCourse);
-					$this->service->setNextShortName($nextShortname);
-					$this->service->runService($nbElemRestore);
-					$this->retrievecoursedb->addCourse_retrievecourse($shortname , $nextShortname , $CFG->temp , $idCourse);
+				
+				$indice = 0;
+				//BAckup/restore pour un cour
+				$nbElemRestore = count($cour) * 2 ;
+				$this->service->step =1/($nbElemRestore);
+				foreach ($cour as $idCourse){
+					$shortname =  $this->db->getShortnameCourse($idCourse);
+					$nextShortname = nextShortname($shortname);
+					progression($indice);
+					$this->service->currentProgress = $indice;
+					if($shortname != NULL){
+						$this->service->setCourse($idCourse);
+						$this->service->setNextShortName($nextShortname);
+						$this->service->runService($nbElemRestore);
+						$this->retrievecoursedb->addCourse_retrievecourse($shortname , $nextShortname , $CFG->temp , $idCourse);
+					}
+					$indice += (100 /($nbElemRestore ))*2;
 				}
-				$indice += (100 /($nbElemRestore ))*2;
+				
+				echo '</br> </br>';
+				$msg = utf8_encode("Backup/Restore terminé avec succés");
+				message($msg,'index.php');
 			}
 			
-			$msg = utf8_encode("Backup/Restore terminé avec succés");
-			message($msg,'index.php');
+		}
+	}
+	
+	private function supprimerCourUsedPlugin(&$cour){
+		//Cette méthode sert principalement à éviter de refaire les backup des même cours lorsqu'on réactualise la page.
+		if($cour[0] == -1){
+			unset($cour[0]);
+		}
+			
+		for($i = 0 ; $i < count($cour) ; $i++){
+			if($this->retrievecoursedb->checkPluginUsed($cour[$i])){
+				unset($cour[$i]);
+			}
 		}
 	}
 	
