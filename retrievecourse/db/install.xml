@@ -1,44 +1,78 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="report/retrievecourse/db" VERSION="20120830" COMMENT="XMLDB file for Moodle report/retrievecourse"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
->
-  <TABLES>
-    <TABLE NAME="retrievecourse" COMMENT="Contient tous les cours qui utilisé le plugin." >
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="courseid_old"/>
-        <FIELD NAME="courseid_old" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="courseid_new"/>
-        <FIELD NAME="courseid_new" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid_old" NEXT="shortname_course_old"/>
-        <FIELD NAME="shortname_course_old" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid_new" NEXT="shortname_course_new"/>
-         <FIELD NAME="shortname_course_new" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="shortname_course_old" NEXT="annac"/>
-        <FIELD NAME="annac" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="shortname_course_new" NEXT="user"/>
-     	<FIELD NAME="user" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="date" />
-     	<FIELD NAME="date" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="user" NEXT="flag_newcourse"/>
-        <FIELD NAME="flag_newcourse" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="date"  />
-        <FIELD NAME="flag_use_cron" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"  />
-        <FIELD NAME="flag_wait_cron_execute" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="date"  />
-      </FIELDS>
-       <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this instance." NEXT="assignment"/>
-        <KEY NAME="assignment" TYPE="foreign" FIELDS="courseid_new" REFTABLE="course" REFFIELDS="id" PREVIOUS="primary"/>
-      </KEYS>
-    </TABLE>
-    <TABLE NAME="retrievecourse_cron" COMMENT="Contient tous les cours qui vont" >
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="courseid"/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="shortname_course_new"/>
-        <FIELD NAME="shortname_course_new" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid" NEXT="user"/>
-     	<FIELD NAME="user" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"  />
-     	<FIELD NAME="status" TYPE="text"  NOTNULL="false"  SEQUENCE="false" COMMENT="flag qui permet de savoir si ce cour est en cour de backup/restore"/>
-      	<FIELD NAME="time_created" TYPE="text" NOTNULL="false" SEQUENCE="false" />
-      	<FIELD NAME="time_start" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Heure à laquelle cron à démarrer le backup"/>
-      	<FIELD NAME="time_modified" TYPE="text" NOTNULL="false" SEQUENCE="false" />
-      	<FIELD NAME="tentative" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-      </FIELDS>
-       <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this instance." NEXT="assignment"/>
-        <KEY NAME="assignment" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id" PREVIOUS="primary"/>
-      </KEYS>
-    </TABLE>
-   </TABLES>
+<XMLDB PATH="report/retrievecourse/db" VERSION="20120830"
+	COMMENT="XMLDB file for Moodle report/retrievecourse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+	<TABLES>
+		<TABLE NAME="retrievecourse" COMMENT="Contient tous les cours qui utilisé le plugin.">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true"
+					SEQUENCE="true" NEXT="courseid_old" />
+				<FIELD NAME="courseid_old" TYPE="int" LENGTH="10" NOTNULL="true"
+					DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="courseid_new" />
+				<FIELD NAME="courseid_new" TYPE="int" LENGTH="10" NOTNULL="true"
+					DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid_old" NEXT="shortname_course_old" />
+				<FIELD NAME="shortname_course_old" TYPE="char" LENGTH="255"
+					NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid_new"
+					NEXT="shortname_course_new" />
+				<FIELD NAME="shortname_course_new" TYPE="char" LENGTH="255"
+					NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="shortname_course_old"
+					NEXT="annac" />
+				<FIELD NAME="annac" TYPE="char" LENGTH="10" NOTNULL="true"
+					DEFAULT="0" SEQUENCE="false" PREVIOUS="shortname_course_new" NEXT="user" />
+				<FIELD NAME="user" TYPE="char" LENGTH="255" NOTNULL="true"
+					DEFAULT="0" SEQUENCE="false" PREVIOUS="date" />
+				<FIELD NAME="date" TYPE="char" LENGTH="255" NOTNULL="true"
+					DEFAULT="0" SEQUENCE="false" PREVIOUS="user" NEXT="flag_newcourse" />
+				<FIELD NAME="flag_newcourse" TYPE="int" LENGTH="1" NOTNULL="true"
+					DEFAULT="0" SEQUENCE="false" PREVIOUS="date" />
+				<FIELD NAME="flag_use_cron" TYPE="int" LENGTH="1" NOTNULL="true"
+					DEFAULT="0" SEQUENCE="false" />
+				<FIELD NAME="flag_wait_cron_execute" TYPE="int" LENGTH="1"
+					NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="date" />
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"
+					COMMENT="The unique id for this instance." NEXT="assignment" />
+				<KEY NAME="fk1" TYPE="foreign" FIELDS="courseid_new" REFTABLE="course"
+					REFFIELDS="id" PREVIOUS="primary" />
+				<KEY NAME="fk2" TYPE="foreign" FIELDS="courseid_old" REFTABLE="course"
+					REFFIELDS="id" PREVIOUS="fk1" />
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="unique1" UNIQUE="true" FIELDS="courseid_old" />
+				<INDEX NAME="unique2" UNIQUE="true" FIELDS="courseid_new" />
+			</INDEXES>
+		</TABLE>
+		<TABLE NAME="retrievecourse_cron" COMMENT="Contient tous les cours qui vont">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true"
+					SEQUENCE="true" NEXT="courseid" />
+				<FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"
+					DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="shortname_course_new" />
+				<FIELD NAME="shortname_course_new" TYPE="char" LENGTH="255"
+					NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid"
+					NEXT="user" />
+				<FIELD NAME="user" TYPE="char" LENGTH="255" NOTNULL="true"
+					DEFAULT="0" SEQUENCE="false" />
+				<FIELD NAME="status" TYPE="text" NOTNULL="false" SEQUENCE="false"
+					COMMENT="flag qui permet de savoir si ce cour est en cour de backup/restore" />
+				<FIELD NAME="time_created" TYPE="text" NOTNULL="false"
+					SEQUENCE="false" />
+				<FIELD NAME="time_start" TYPE="text" NOTNULL="false" SEQUENCE="false"
+					COMMENT="Heure à laquelle cron à démarrer le backup" />
+				<FIELD NAME="time_modified" TYPE="text" NOTNULL="false"
+					SEQUENCE="false" />
+				<FIELD NAME="tentative" TYPE="int" LENGTH="10" NOTNULL="true"
+					SEQUENCE="false" />
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"
+					COMMENT="The unique id for this instance." NEXT="assignment" />
+				<KEY NAME="fk1" TYPE="foreign" FIELDS="courseid" REFTABLE="course"
+					REFFIELDS="id" PREVIOUS="primary" />
+				<KEY NAME="fk2" TYPE="foreign" FIELDS="courseid" REFTABLE="retrievecourse"
+					REFFIELDS="courseid_old" PREVIOUS="fk1" />
+			</KEYS>
+		</TABLE>
+	</TABLES>
 </XMLDB>
