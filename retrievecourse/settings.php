@@ -79,7 +79,7 @@ $temp->add ( new admin_setting_configtime ( 'cron_heure_fin', 'cron_minute_fin',
 
 $temp->add ( new admin_setting_configtext ( 'nbTentativeMax', get_string ( 'nbTentativeMax', 'report_retrievecourse' ), get_string ( 'retrievecourse_description', 'report_retrievecourse' ), 2, PARAM_INT ) );
 
-$temp->add ( new admin_setting_configtext ( 'time_before_update', 'time_before_update', 'Le temps accordé avant la prochaine mise à jour ', 5400, PARAM_INT ) );
+$temp->add ( new admin_setting_configtext ( 'time_before_update', 'time_before_update', utf8_encode('Le temps accordé avant la prochaine mise à jour '), 5400, PARAM_INT ) );
 
 $temp->add ( new admin_setting_configtext ( 'post_max_size', get_string ( 'post_max_size', 'report_retrievecourse' ), get_string ( 'retrievecourse_description', 'report_retrievecourse' ), "40G", PARAM_ALPHANUM ) );
 

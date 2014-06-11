@@ -80,6 +80,7 @@ class cronService {
 		// Si getIdCronRunning() retourne NULL c'est qu'il n'y aucun processus cron qui tourne.
 		if ($idCron != NULL) {
 			$timelose = $CFG->time_before_update;
+			var_dump($timelose);
 			$lastTime_modified = $this->crondb->getTimeModifiedCron ( $idCron );
 			mtrace ( 'last_modified: ' . $lastTime_modified );
 			flush ();

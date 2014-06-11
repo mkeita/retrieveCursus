@@ -10,7 +10,11 @@ $string ['post_max_size'] = utf8_encode ( " taille maximale des données reçues p
 
 // FormTeacher
 $string ['warning'] = 'Attention';
-$string ['messageTeacher'] = '<p> <font color="#FF0000"> ' . utf8_encode ( "Cour vider" ) . ' </font></p>';
+$string ['messageTeacher_part1'] = '<p> <font color="#FF0000"> ' . utf8_encode ( "Attention, si vous choisissez de copier le contenu du cours " );
+$string ['messageTeacher_part2'] =  utf8_encode ( " vers le cours " );
+$string ['messageTeacher_part3'] =  utf8_encode ( " .Tout le contenu du cours  " ) ;
+$string ['messageTeacher_part4'] = utf8_encode ( " sera écrasé.  " ) . ' </font></p>';
+
 $string ['messageTeacherChoice'] = utf8_encode ( '<p> Désirez-vous récupérer vos données ou commencer 
 		un nouveau cour ? </p>' );
 $string ['checkbox_recuperer'] = utf8_encode ( 'Récupérer information 		' );

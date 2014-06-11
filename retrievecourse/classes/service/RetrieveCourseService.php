@@ -270,8 +270,7 @@ class RetrieveCourseService {
 	private function send_email($userid, $shortname) {
 		global $DB;
 		
-		$message = 'Bonjour, </br> </br>';
-		$message .= $shortname . ' disponible';
+		$message = utf8_encode("Ce message est un message automatique pour vous prévenir que le contenu de votre cours ". $this->db->getShortnameCourse($this->course)  ." a bien été copié dans le cours ". $shortname .".");
 		
 		$userto = $DB->get_record ( 'user', array (
 				"id" => $userid 
@@ -279,13 +278,14 @@ class RetrieveCourseService {
 		
 		$admin = get_admin ();
 		$admin->priority = 1;
+	
 		
 		// Send the message
 		$eventdata = new stdClass ();
 		$eventdata->modulename = 'moodle';
 		$eventdata->userfrom = $admin;
 		$eventdata->userto = $userto;
-		$eventdata->subject = utf8_encode ( 'Récupération des informations dans le cours ' . $shortname );
+		$eventdata->subject = utf8_encode ( 'UV - Confirmation de la copie de votre cours' );
 		$eventdata->fullmessage = $message;
 		$eventdata->fullmessageformat = FORMAT_PLAIN;
 		$eventdata->fullmessagehtml = '';
@@ -294,6 +294,24 @@ class RetrieveCourseService {
 		$eventdata->name = 'backup';
 		$eventdata->notification = 1;
 		message_send ( $eventdata );
+		
+		//Permet de prévenir les professeurs concerné que leur cours a été restauré.s 
+		if(is_siteadmin($userto)){
+			
+			$courseNextShortname = $this->db->getCourseId ( $shortname );
+			$context_id = $this->db->getContextid( $courseNextShortname );
+			$context = context::instance_by_id($context_id);
+			$users = get_role_users(RetrieveCourseConstante::teacher_roleid, $context);
+			
+			foreach($users as $user){
+				$eventdata->userto = $user;
+				message_send ( $eventdata );
+			}
+		}
+		
+		
+		
+		
 	}
 	private function restore() {
 		global $DB, $CFG, $USER;

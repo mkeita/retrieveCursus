@@ -65,9 +65,9 @@ class ControllerFormAdmin {
 			$message_cron = get_string ( 'msg_cron', 'report_retrievecourse' );
 			$message_backup = get_string ( 'msg_backup', 'report_retrievecourse' );
 			if ($infoForm->choice_type_backup)
-				$this->confirmation ( $message_backup, RetrieveCourseConstante::CONFIRMATION_BACKUP_IMMEDIAT, $infoForm->cours );
+				$this->confirmation ( $message_backup, RetrieveCourseConstante::CONFIRMATION_BACKUP_IMMEDIAT, $infoForm->cours , $infoForm->category, $infoForm->recherche );
 			else
-				$this->confirmation ( $message_cron, RetrieveCourseConstante::CONFIRMATION_USE_CRON, $infoForm->cours );
+				$this->confirmation ( $message_cron, RetrieveCourseConstante::CONFIRMATION_USE_CRON, $infoForm->cours , $infoForm->category , $infoForm->recherche );
 		}
 	}
 	
@@ -95,7 +95,7 @@ class ControllerFormAdmin {
 	 * @param int $type_confirmation        	
 	 * @param array $cours        	
 	 */
-	private function confirmation($message, $type_confirmation, $cours) {
+	private function confirmation($message, $type_confirmation, $cours , $category , $search) {
 		// Le choix effectuer par l'utilisateur est récupérer dans la classe ControllerPrincipale.php - méthode adminDisplay()).
 		// En fonction du choix effectué , il exécutera soit la méthode backup_immédiat() soit la méthode admin_use_cron() de cette classe.
 		global $PAGE, $OUTPUT;
@@ -105,8 +105,16 @@ class ControllerFormAdmin {
 			// En effet , si on séléctionne pas ALL mais qu'on séléctionne des cours manuellement , '$cours' contiendra juste les id des
 			// cours séléctionné.
 			
-			$cours = array_keys ( $this->formAdmin->getListeCour () );
-		}
+			//Permet de prendre en compte si l'utilisateur avait au préable effectué une recherche.
+			//On fera le backup juste des cours qui apparaissait dans la recherche.
+			if($search != NULL){
+				$cours = array_keys($this->retrievecoursedb->searchCourseNotUsedPlugin ( $search ));
+			}elseif($category == '-1'){
+				$cours = array_keys ( $this->formAdmin->getListeCour () );
+			}else{
+				$cours = array_keys (  $this->retrievecoursedb->courseNotUsedPugin ( $category ));
+			}
+  		}
 		echo $OUTPUT->confirm ( $message, '/report/retrievecourse/index.php?confirmation=' . $type_confirmation . '&cour=' . json_encode ( $cours ), '/report/retrievecourse/index.php' );
 	}
 	
@@ -176,13 +184,16 @@ class ControllerFormAdmin {
 	 * @param array $cour        	
 	 */
 	private function supprimerCourUsedPlugin(&$cour) {
-		if ($cour [0] == - 1) {
-			unset ( $cour [0] );
+		$i = 0;
+		$taille = count($cour);
+		if ($cour[0] == - 1) {
+			unset ( $cour[0] );
+			$i = 1;
 		}
 		
-		$taille = count ( $cour );
-		for($i = 1; $i <= $taille; $i ++) {
-			if ($this->retrievecoursedb->checkPluginUsed ( $cour [$i] )) {
+		
+		for(; $i < $taille; $i ++) {
+			if ($this->retrievecoursedb->checkPluginUsed($cour[$i])) {
 				unset ( $cour [$i] );
 			}
 		}

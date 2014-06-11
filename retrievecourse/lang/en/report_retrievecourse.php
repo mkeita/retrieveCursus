@@ -13,7 +13,10 @@ $string ['max_input_time'] = utf8_encode ( "Cette option spécifie la durée maxim
 
 // FormTeacher
 $string ['warning'] = 'Warning';
-$string ['messageTeacher'] = '<p> <font color="#FF0000"> ' . utf8_encode ( "Cour vider" ) . ' </font></p>';
+$string ['messageTeacher_part1'] = '<p> <font color="#FF0000"> ' . utf8_encode ( "Be careful if you choose to copy the content of the course" );
+$string ['messageTeacher_part2'] =  utf8_encode ( " to the course " );
+$string ['messageTeacher_part3'] =  utf8_encode ( " .All course content " ) ;
+$string ['messageTeacher_part4'] = utf8_encode ( " will be overwritten  " ) . ' </font></p>';
 $string ['messageTeacherChoice'] = utf8_encode ( '<p> Do you want to recover your data or start
 a new court? </p>' );
 $string ['checkbox_recuperer'] = utf8_encode ( 'retrieve information		' );

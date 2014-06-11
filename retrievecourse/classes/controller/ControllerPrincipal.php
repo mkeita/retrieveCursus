@@ -53,12 +53,13 @@ class ControllerPrincipal {
 	 * Affiche une vue différente en fonction que la personne connecté est un administrateur ou un professeur.
 	 */
 	public function display() {
-		(is_siteadmin ()) ? $this->adminDisplay () : $this->teacherDisplay ();
+		(is_siteadmin()) ? $this->adminDisplay () : $this->teacherDisplay ();
 	}
 	private function adminDisplay() {
 		// Ces informations sont placé dans l'url dans la méthode admin_submit de la classe ControllerFormTeacher
 		$confirm = optional_param ( 'confirmation', 0, PARAM_TEXT );
 		$courJson = optional_param ( 'cour', 0, PARAM_TEXT );
+		
 		
 		if ($confirm != NULL && $courJson != NULL) {
 			$controllerFormAdmin = new ControllerFormAdmin ( null );
@@ -129,7 +130,7 @@ class ControllerPrincipal {
 		$outcome = true;
 		$course_used = $this->retrievecoursedb->checkPluginUsed ( $_SESSION ['idCourse'] );
 		if ($course_used) {
-			message ( get_string ( 'msg_error_plugin_deja_utlise', 'report_retirevecourse' ) );
+			message ( get_string ( 'msg_error_plugin_deja_utlise', 'report_retrievecourse' ) );
 			$outcome = false;
 		}
 		return $outcome;

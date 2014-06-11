@@ -63,20 +63,39 @@ class FormAdmin extends moodleform {
 			$category = NULL;
 		if ($search != NULL) {
 			$this->listeCour = $this->retrievecoursedb->searchCourseNotUsedPlugin ( $search );
+			
 		} else {
 			$this->listeCour = $this->retrievecoursedb->courseNotUsedPugin ( $category );
 		}
 	}
 	private function creationTrie($mform) {
+		$search = optional_param ( 'search', '', PARAM_TEXT );
+		$category = optional_param ( 'categories', NULL, PARAM_TEXT );
+		
 		$mform->addElement ( 'header', 'trie', get_string ( 'trie', 'report_retrievecourse' ) );
 		$listCategory = $this->db->retrieveCategories ();
 		$select = $mform->addElement ( 'select', 'category', get_string ( 'categorie', 'report_retrievecourse' ), $listCategory );
+		
+		if($category != NULL){
+			$mform->getElement ( 'category' )->setSelected ( array (
+					$category
+			) );
+		}
+		
+		
 		$mform->addElement ( 'html', get_string ( "element_recherche", "report_retrievecourse" ) . '<br/>' );
 		$mform->addElement ( 'text', 'recherche', get_string ( 'recherche', 'report_retrievecourse' ) );
 		$mform->setType ( 'recherche', PARAM_TEXT );
-		$mform->registerNoSubmitButton ( get_string ( 'trie', 'report_retrievecourse' ) );
+	
+		if($search != NULL){
+			$mform->getElement('recherche')->setValue($search);
+		}
+		
+		
+		
+		$mform->registerNoSubmitButton ('trie');
 		$otagsgrp = array ();
-		$otagsgrp [] = & $mform->createElement ( 'submit', 'trie', 'trie' );
+		$otagsgrp [] = & $mform->createElement ( 'submit', 'trie', get_string ( 'trie', 'report_retrievecourse' ) );
 		$mform->addGroup ( $otagsgrp, '', '', '<br>' );
 		$mform->closeHeaderBefore ( 'end_trie' );
 	}
